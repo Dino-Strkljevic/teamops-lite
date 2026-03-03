@@ -1,3 +1,20 @@
+server:
+  port: 8080
+
 spring:
-  application:
-    name: teamops-lite
+  datasource:
+    url: jdbc:postgresql://localhost:5432/teamops
+    username: teamops
+    password: teamops
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
