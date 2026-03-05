@@ -4,12 +4,14 @@ import {
   Box,
   Button,
   Card,
+  CardActionArea,
   CardContent,
   CircularProgress,
   Snackbar,
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { useNavigate } from "react-router-dom";
 import { useProjects } from "../features/projects/hooks/useProjects";
 import CreateProjectDialog from "../features/projects/components/CreateProjectDialog";
 
@@ -21,6 +23,7 @@ export default function ProjectsPage() {
   const { data: projects, isLoading, isError } = useProjects();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>(CLOSED_SNACKBAR);
+  const navigate = useNavigate();
 
   function handleSuccess() {
     setDialogOpen(false);
@@ -62,16 +65,18 @@ export default function ProjectsPage() {
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {projects.map((project) => (
             <Card key={project.id} variant="outlined">
-              <CardContent>
-                <Typography variant="subtitle1" fontWeight={600}>
-                  {project.name}
-                </Typography>
-                {project.description && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {project.description}
+              <CardActionArea onClick={() => navigate(`/projects/${project.id}`)}>
+                <CardContent>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {project.name}
                   </Typography>
-                )}
-              </CardContent>
+                  {project.description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      {project.description}
+                    </Typography>
+                  )}
+                </CardContent>
+              </CardActionArea>
             </Card>
           ))}
         </Box>
