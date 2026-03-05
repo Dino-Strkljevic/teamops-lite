@@ -5,9 +5,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardContent,
-  Chip,
   CircularProgress,
   Divider,
   IconButton,
@@ -18,35 +15,14 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import { useTasks } from '../features/tasks/hooks/useTasks';
-import type { TaskPriority, TaskStatus } from '../features/tasks/types';
 import { projectKeys } from '../features/projects/hooks/useProjects';
 import type { Project } from '../features/projects/types';
 import CreateTaskDialog from '../features/tasks/components/CreateTaskDialog';
+import KanbanBoard from '../features/tasks/components/KanbanBoard';
 
 type SnackbarState = { open: boolean; severity: 'success' | 'error'; message: string };
 
 const CLOSED_SNACKBAR: SnackbarState = { open: false, severity: 'success', message: '' };
-
-const STATUS_COLOR: Record<TaskStatus, 'default' | 'info' | 'success' | 'error'> = {
-  TODO:        'default',
-  IN_PROGRESS: 'info',
-  DONE:        'success',
-  CANCELLED:   'error',
-};
-
-const STATUS_LABEL: Record<TaskStatus, string> = {
-  TODO:        'To Do',
-  IN_PROGRESS: 'In Progress',
-  DONE:        'Done',
-  CANCELLED:   'Cancelled',
-};
-
-const PRIORITY_COLOR: Record<TaskPriority, 'default' | 'warning' | 'error' | 'success'> = {
-  LOW:      'success',
-  MEDIUM:   'default',
-  HIGH:     'warning',
-  CRITICAL: 'error',
-};
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -103,49 +79,8 @@ export default function ProjectDetailPage() {
         <Alert severity="error">Failed to load tasks.</Alert>
       )}
 
-      {!isLoading && !isError && tasks?.length === 0 && (
-        <Typography color="text.secondary">No tasks yet.</Typography>
-      )}
-
-      {tasks && tasks.length > 0 && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {tasks.map((task) => (
-            <Card key={task.id} variant="outlined">
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2 }}>
-                  <Typography variant="subtitle1" fontWeight={600}>
-                    {task.title}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
-                    <Chip
-                      label={STATUS_LABEL[task.status]}
-                      color={STATUS_COLOR[task.status]}
-                      size="small"
-                    />
-                    <Chip
-                      label={task.priority}
-                      color={PRIORITY_COLOR[task.priority]}
-                      size="small"
-                      variant="outlined"
-                    />
-                  </Box>
-                </Box>
-
-                {task.description && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                    {task.description}
-                  </Typography>
-                )}
-
-                {task.dueDate && (
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    Due: {task.dueDate}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
+      {!isLoading && !isError && (
+        <KanbanBoard tasks={tasks ?? []} />
       )}
       <CreateTaskDialog
         open={dialogOpen}
