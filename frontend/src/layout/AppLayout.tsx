@@ -1,7 +1,24 @@
-import { AppBar, Box, Drawer, Toolbar, Typography } from "@mui/material";
-import { Outlet } from "react-router-dom";
+import {
+  AppBar,
+  Box,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import FolderIcon from "@mui/icons-material/Folder";
+import { Outlet, NavLink } from "react-router-dom";
 
-const drawerWidth = 240;
+const DRAWER_WIDTH = 240;
+
+const NAV_ITEMS = [
+  { label: "Dashboard", to: "/", icon: <DashboardIcon /> },
+  { label: "Projects", to: "/projects", icon: <FolderIcon /> },
+];
 
 export default function AppLayout() {
   return (
@@ -20,20 +37,29 @@ export default function AppLayout() {
       <Drawer
         variant="permanent"
         sx={{
-          width: drawerWidth,
+          width: DRAWER_WIDTH,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
+          [`& .MuiDrawer-paper`]: { width: DRAWER_WIDTH, boxSizing: "border-box" },
         }}
       >
         <Toolbar />
-        <Box sx={{ p: 2 }}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Navigation (coming next)
-          </Typography>
-        </Box>
+        <List disablePadding>
+          {NAV_ITEMS.map(({ label, to, icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              {({ isActive }) => (
+                <ListItemButton selected={isActive}>
+                  <ListItemIcon sx={{ minWidth: 40 }}>{icon}</ListItemIcon>
+                  <ListItemText primary={label} />
+                </ListItemButton>
+              )}
+            </NavLink>
+          ))}
+        </List>
       </Drawer>
 
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
