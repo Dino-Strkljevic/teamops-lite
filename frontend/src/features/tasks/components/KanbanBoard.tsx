@@ -15,10 +15,12 @@ const COLUMNS: Column[] = [
 ];
 
 interface Props {
-  tasks: Task[];
+  tasks:     Task[];
+  onSuccess: () => void;
+  onError:   () => void;
 }
 
-export default function KanbanBoard({ tasks }: Props) {
+export default function KanbanBoard({ tasks, onSuccess, onError }: Props) {
   const byStatus = (status: TaskStatus) => tasks.filter((t) => t.status === status);
 
   return (
@@ -68,7 +70,14 @@ export default function KanbanBoard({ tasks }: Props) {
                   No tasks
                 </Typography>
               ) : (
-                columnTasks.map((task) => <TaskCard key={task.id} task={task} />)
+                columnTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onSuccess={onSuccess}
+                    onError={onError}
+                  />
+                ))
               )}
             </Stack>
           </Box>

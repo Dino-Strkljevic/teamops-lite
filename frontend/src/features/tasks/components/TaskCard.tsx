@@ -1,5 +1,6 @@
-import { Box, Card, CardContent, Chip, Typography } from '@mui/material';
-import type { Task, TaskPriority } from '../types';
+import { Box, Button, Card, CardContent, Chip, Typography } from '@mui/material';
+import type { Task, TaskPriority, TaskStatus } from '../types';
+import { useUpdateTaskStatus } from '../hooks/useUpdateTaskStatus';
 
 const PRIORITY_COLOR: Record<TaskPriority, 'default' | 'success' | 'warning' | 'error'> = {
   LOW:      'success',
@@ -15,11 +16,36 @@ const PRIORITY_LABEL: Record<TaskPriority, string> = {
   CRITICAL: 'Critical',
 };
 
+const NEXT_STATUS: Partial<Record<TaskStatus, TaskStatus>> = {
+  TODO:        'IN_PROGRESS',
+  IN_PROGRESS: 'DONE',
+};
+
+const ACTION_LABEL: Partial<Record<TaskStatus, string>> = {
+  TODO:        'Start Task',
+  IN_PROGRESS: 'Mark Done',
+};
+
 interface Props {
-  task: Task;
+  task:      Task;
+  onSuccess: () => void;
+  onError:   () => void;
 }
 
-export default function TaskCard({ task }: Props) {
+export default function TaskCard({ task, onSuccess, onError }: Props) {
+  const { mutate, isPending } = useUpdateTaskStatus();
+
+  const nextStatus = NEXT_STATUS[task.status];
+  const actionLabel = ACTION_LABEL[task.status];
+
+  function handleAction() {
+    if (!nextStatus) return;
+    mutate(
+      { taskId: task.id, projectId: task.projectId, status: nextStatus },
+      { onSuccess, onError },
+    );
+  }
+
   return (
     <Card variant="outlined">
       <CardContent sx={{ '&:last-child': { pb: 2 } }}>
@@ -56,6 +82,19 @@ export default function TaskCard({ task }: Props) {
             </Typography>
           )}
         </Box>
+
+        {actionLabel && (
+          <Button
+            size="small"
+            variant="outlined"
+            fullWidth
+            sx={{ mt: 1.5 }}
+            disabled={isPending}
+            onClick={handleAction}
+          >
+            {isPending ? '…' : actionLabel}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

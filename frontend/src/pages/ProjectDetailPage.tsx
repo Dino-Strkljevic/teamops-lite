@@ -80,7 +80,11 @@ export default function ProjectDetailPage() {
       )}
 
       {!isLoading && !isError && (
-        <KanbanBoard tasks={tasks ?? []} />
+        <KanbanBoard
+          tasks={tasks ?? []}
+          onSuccess={() => setSnackbar({ open: true, severity: 'success', message: 'Task updated.' })}
+          onError={() => setSnackbar({ open: true, severity: 'error', message: 'Failed to update task. Please try again.' })}
+        />
       )}
       <CreateTaskDialog
         open={dialogOpen}

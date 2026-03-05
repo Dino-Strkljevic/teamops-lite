@@ -95,6 +95,16 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    @Transactional
+    public Task updateStatus(UUID taskId, UUID orgId, TaskStatus status) {
+        Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        task.setStatus(status);
+
+        return taskRepository.save(task);
+    }
+
     @Transactional(readOnly = true)
     public Task getTaskById(UUID taskId, UUID orgId) {
         return taskRepository.findByIdAndOrgId(taskId, orgId)

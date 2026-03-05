@@ -3,6 +3,7 @@ package com.teamops.task.controller;
 import com.teamops.task.controller.dto.AssignTaskRequest;
 import com.teamops.task.controller.dto.CreateTaskRequest;
 import com.teamops.task.controller.dto.TaskResponse;
+import com.teamops.task.controller.dto.UpdateTaskStatusRequest;
 import com.teamops.task.entity.Task;
 import com.teamops.task.entity.TaskStatus;
 import com.teamops.task.service.TaskService;
@@ -58,6 +59,16 @@ public class TaskController {
                 : taskService.getTasksByOrg(orgId);
 
         return tasks.stream().map(TaskResponse::from).toList();
+    }
+
+    @PatchMapping("/{taskId}/status")
+    public TaskResponse updateStatus(
+            @RequestHeader("X-Org-Id") UUID orgId,
+            @PathVariable UUID taskId,
+            @Valid @RequestBody UpdateTaskStatusRequest body) {
+
+        Task task = taskService.updateStatus(taskId, orgId, body.status());
+        return TaskResponse.from(task);
     }
 
     @PatchMapping("/{taskId}/assignee")
