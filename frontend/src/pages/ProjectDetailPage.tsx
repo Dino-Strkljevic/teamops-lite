@@ -1,22 +1,31 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
   Box,
+  Button,
   Card,
   CardContent,
   Chip,
   CircularProgress,
   Divider,
   IconButton,
+  Snackbar,
   Tooltip,
   Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddIcon from '@mui/icons-material/Add';
 import { useTasks } from '../features/tasks/hooks/useTasks';
 import type { TaskPriority, TaskStatus } from '../features/tasks/types';
 import { projectKeys } from '../features/projects/hooks/useProjects';
 import type { Project } from '../features/projects/types';
+import CreateTaskDialog from '../features/tasks/components/CreateTaskDialog';
+
+type SnackbarState = { open: boolean; severity: 'success' | 'error'; message: string };
+
+const CLOSED_SNACKBAR: SnackbarState = { open: false, severity: 'success', message: '' };
 
 const STATUS_COLOR: Record<TaskStatus, 'default' | 'info' | 'success' | 'error'> = {
   TODO:        'default',
@@ -43,6 +52,8 @@ export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState<SnackbarState>(CLOSED_SNACKBAR);
 
   const projectName = queryClient
     .getQueryData<Project[]>(projectKeys.list())
@@ -51,15 +62,33 @@ export default function ProjectDetailPage() {
 
   const { data: tasks, isLoading, isError } = useTasks(projectId!);
 
+  function handleSuccess() {
+    setDialogOpen(false);
+    setSnackbar({ open: true, severity: 'success', message: 'Task created.' });
+  }
+
+  function handleError() {
+    setSnackbar({ open: true, severity: 'error', message: 'Failed to create task. Please try again.' });
+  }
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
-        <Tooltip title="Back to Projects">
-          <IconButton onClick={() => navigate('/projects')} size="small">
-            <ArrowBackIcon />
-          </IconButton>
-        </Tooltip>
-        <Typography variant="h5">{projectName}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Tooltip title="Back to Projects">
+            <IconButton onClick={() => navigate('/projects')} size="small">
+              <ArrowBackIcon />
+            </IconButton>
+          </Tooltip>
+          <Typography variant="h5">{projectName}</Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setDialogOpen(true)}
+        >
+          New Task
+        </Button>
       </Box>
 
       <Divider sx={{ mb: 3 }} />
@@ -118,6 +147,28 @@ export default function ProjectDetailPage() {
           ))}
         </Box>
       )}
+      <CreateTaskDialog
+        open={dialogOpen}
+        projectId={projectId!}
+        onClose={() => setDialogOpen(false)}
+        onSuccess={handleSuccess}
+        onError={handleError}
+      />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar(CLOSED_SNACKBAR)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar(CLOSED_SNACKBAR)}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
