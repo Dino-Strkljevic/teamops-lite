@@ -1,16 +1,21 @@
-import { Card, CardContent, Typography } from "@mui/material";
+import { useProjects } from "../features/projects/hooks/useProjects";
 
 export default function DashboardPage() {
+  const { data, isLoading, isError } = useProjects();
+
+  if (isLoading) return <div>Loading projects...</div>;
+  if (isError) return <div>Error loading projects</div>;
+
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h5" gutterBottom>
-          Dashboard
-        </Typography>
-        <Typography color="text.secondary">
-          Frontend scaffold is working.
-        </Typography>
-      </CardContent>
-    </Card>
+    <div>
+      <h2>Projects</h2>
+
+      {data?.map((project: any) => (
+        <div key={project.id}>
+          <strong>{project.name}</strong>
+          <p>{project.description}</p>
+        </div>
+      ))}
+    </div>
   );
 }
