@@ -21,7 +21,8 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver }         from '@hookform/resolvers/zod';
 import { z }                   from 'zod';
 import type { Task, TaskPriority, TaskStatus } from '../types';
-import { useEditTask }   from '../hooks/useEditTask';
+import { useEditTask }        from '../hooks/useEditTask';
+import DeleteTaskDialog       from './DeleteTaskDialog';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -361,22 +362,26 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
 
 
 export interface TaskDetailsDrawerProps {
-  task:            Task | null;
-  onClose:         () => void;
-  onDelete:        () => void;
-  onEditSuccess:   (updated: Task) => void;
-  onEditError:     () => void;
+  task:             Task | null;
+  onClose:          () => void;
+  onEditSuccess:    (updated: Task) => void;
+  onEditError:      () => void;
+  onDeleteSuccess:  () => void;
+  onDeleteError:    () => void;
 }
 
 export default function TaskDetailsDrawer({
   task,
   onClose,
-  onDelete,
   onEditSuccess,
   onEditError,
+  onDeleteSuccess,
+  onDeleteError,
 }: TaskDetailsDrawerProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing]         = useState(false);
+  const [taskToDelete, setTaskToDelete]   = useState<Task | null>(null);
 
+  // Reset edit mode whenever the selected task changes or the drawer closes
   useEffect(() => {
     setIsEditing(false);
   }, [task]);
@@ -393,85 +398,105 @@ export default function TaskDetailsDrawer({
     onEditSuccess(updated);
   }
 
+  function handleDeleteSuccess() {
+    setTaskToDelete(null);
+    onClose();          // close the drawer — the task no longer exists
+    onDeleteSuccess();
+  }
+
+  function handleDeleteError() {
+    setTaskToDelete(null);
+    onDeleteError();
+  }
+
   const drawerTitle = isEditing ? 'Edit Task' : (task?.title ?? '');
 
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={handleClose}
-      PaperProps={{
-        sx: {
-          width:         { xs: '100vw', sm: DRAWER_WIDTH },
-          display:       'flex',
-          flexDirection: 'column',
-        },
-      }}
-    >
-      {/* ── Header (always visible) ── */}
-      <Box
-        sx={{
-          display:        'flex',
-          alignItems:     'center',
-          justifyContent: 'space-between',
-          px: 3,
-          pt: 2.5,
-          pb: 1.5,
-          flexShrink: 0,
+    <>
+      <Drawer
+        anchor="right"
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          sx: {
+            width:         { xs: '100vw', sm: DRAWER_WIDTH },
+            display:       'flex',
+            flexDirection: 'column',
+          },
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
-          {isEditing && (
-            <Tooltip title="Back to details">
-              <IconButton
-                size="small"
-                onClick={() => setIsEditing(false)}
-                sx={{ mr: 0.5, flexShrink: 0 }}
-              >
-                <ArrowBackIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-          <Typography
-            variant="h6"
-            fontWeight={700}
-            sx={{
-              lineHeight:   1.4,
-              overflow:     'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace:   'nowrap',
-            }}
-          >
-            {drawerTitle}
-          </Typography>
+        {/* ── Header (always visible) ── */}
+        <Box
+          sx={{
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'space-between',
+            px: 3,
+            pt: 2.5,
+            pb: 1.5,
+            flexShrink: 0,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+            {isEditing && (
+              <Tooltip title="Back to details">
+                <IconButton
+                  size="small"
+                  onClick={() => setIsEditing(false)}
+                  sx={{ mr: 0.5, flexShrink: 0 }}
+                >
+                  <ArrowBackIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              sx={{
+                lineHeight:   1.4,
+                overflow:     'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace:   'nowrap',
+              }}
+            >
+              {drawerTitle}
+            </Typography>
+          </Box>
+
+          <Tooltip title="Close">
+            <IconButton onClick={handleClose} size="small" sx={{ flexShrink: 0, ml: 1 }}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Box>
 
-        <Tooltip title="Close">
-          <IconButton onClick={handleClose} size="small" sx={{ flexShrink: 0, ml: 1 }}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
+        <Divider sx={{ flexShrink: 0 }} />
 
-      <Divider sx={{ flexShrink: 0 }} />
+        {/* ── Body (swaps between view and edit) ── */}
+        {task && (
+          isEditing ? (
+            <EditPanel
+              task={task}
+              onCancel={() => setIsEditing(false)}
+              onSuccess={handleEditSuccess}
+              onError={onEditError}
+            />
+          ) : (
+            <ViewPanel
+              task={task}
+              onEdit={() => setIsEditing(true)}
+              onDelete={() => setTaskToDelete(task)}
+            />
+          )
+        )}
+      </Drawer>
 
-      {/* ── Body (swaps between view and edit) ── */}
-      {task && (
-        isEditing ? (
-          <EditPanel
-            task={task}
-            onCancel={() => setIsEditing(false)}
-            onSuccess={handleEditSuccess}
-            onError={onEditError}
-          />
-        ) : (
-          <ViewPanel
-            task={task}
-            onEdit={() => setIsEditing(true)}
-            onDelete={onDelete}
-          />
-        )
-      )}
-    </Drawer>
+      <DeleteTaskDialog
+        task={taskToDelete}
+        onClose={() => setTaskToDelete(null)}
+        onSuccess={handleDeleteSuccess}
+        onError={handleDeleteError}
+      />
+    </>
   );
 }

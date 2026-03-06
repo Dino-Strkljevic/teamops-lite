@@ -86,6 +86,8 @@ export default function ProjectDetailPage() {
           onError={() => setSnackbar({ open: true, severity: 'error', message: 'Failed to update task. Please try again.' })}
           onEditSuccess={() => setSnackbar({ open: true, severity: 'success', message: 'Task saved.' })}
           onEditError={() => setSnackbar({ open: true, severity: 'error', message: 'Failed to save task. Please try again.' })}
+          onDeleteSuccess={() => setSnackbar({ open: true, severity: 'success', message: 'Task deleted.' })}
+          onDeleteError={() => setSnackbar({ open: true, severity: 'error', message: 'Failed to delete task. Please try again.' })}
         />
       )}
       <CreateTaskDialog

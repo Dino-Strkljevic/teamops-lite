@@ -123,6 +123,14 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    @Transactional
+    public void deleteTask(UUID taskId, UUID orgId) {
+        Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        taskRepository.delete(task);
+    }
+
     @Transactional(readOnly = true)
     public Task getTaskById(UUID taskId, UUID orgId) {
         return taskRepository.findByIdAndOrgId(taskId, orgId)

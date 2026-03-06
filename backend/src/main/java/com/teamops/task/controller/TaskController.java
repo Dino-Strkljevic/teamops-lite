@@ -80,6 +80,15 @@ public class TaskController {
         return TaskResponse.from(task);
     }
 
+    @DeleteMapping("/{taskId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTask(
+            @RequestHeader("X-Org-Id") UUID orgId,
+            @PathVariable UUID taskId) {
+
+        taskService.deleteTask(taskId, orgId);
+    }
+
     @PatchMapping("/{taskId}/status")
     public TaskResponse updateStatus(
             @RequestHeader("X-Org-Id") UUID orgId,
