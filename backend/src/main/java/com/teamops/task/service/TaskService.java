@@ -105,6 +105,24 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
+    @Transactional
+    public Task updateTask(UUID taskId,
+                           UUID orgId,
+                           String title,
+                           String description,
+                           TaskPriority priority,
+                           LocalDate dueDate) {
+        Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+
+        task.setTitle(title);
+        task.setDescription(description);
+        task.setPriority(priority);
+        task.setDueDate(dueDate);
+
+        return taskRepository.save(task);
+    }
+
     @Transactional(readOnly = true)
     public Task getTaskById(UUID taskId, UUID orgId) {
         return taskRepository.findByIdAndOrgId(taskId, orgId)

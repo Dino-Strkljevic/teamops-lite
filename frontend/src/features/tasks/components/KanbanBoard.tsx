@@ -29,12 +29,14 @@ const COLUMNS: Column[] = [
 const COLUMN_STATUSES = new Set<string>(COLUMNS.map((c) => c.status));
 
 interface Props {
-  tasks:     Task[];
-  onSuccess: () => void;
-  onError:   () => void;
+  tasks:         Task[];
+  onSuccess:     () => void;
+  onError:       () => void;
+  onEditSuccess: () => void;
+  onEditError:   () => void;
 }
 
-export default function KanbanBoard({ tasks, onSuccess, onError }: Props) {
+export default function KanbanBoard({ tasks, onSuccess, onError, onEditSuccess, onEditError }: Props) {
   const [localTasks, setLocalTasks]     = useState<Task[]>(tasks);
   const [activeTask, setActiveTask]     = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -123,8 +125,13 @@ export default function KanbanBoard({ tasks, onSuccess, onError }: Props) {
       <TaskDetailsDrawer
         task={selectedTask}
         onClose={() => setSelectedTask(null)}
-        onEdit={() => {}}
         onDelete={() => {}}
+        onEditSuccess={(updated) => {
+          // Keep the drawer's view panel showing the freshly saved task
+          setSelectedTask(updated);
+          onEditSuccess();
+        }}
+        onEditError={onEditError}
       />
     </>
   );
