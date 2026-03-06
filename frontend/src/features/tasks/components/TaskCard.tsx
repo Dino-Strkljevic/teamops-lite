@@ -27,12 +27,13 @@ const ACTION_LABEL: Partial<Record<TaskStatus, string>> = {
 };
 
 interface Props {
-  task:      Task;
-  onSuccess: () => void;
-  onError:   () => void;
+  task:          Task;
+  onSuccess:     () => void;
+  onError:       () => void;
+  onViewDetails: (task: Task) => void;
 }
 
-export default function TaskCard({ task, onSuccess, onError }: Props) {
+export default function TaskCard({ task, onSuccess, onError, onViewDetails }: Props) {
   const { mutate, isPending } = useUpdateTaskStatus();
 
   const nextStatus = NEXT_STATUS[task.status];
@@ -47,7 +48,11 @@ export default function TaskCard({ task, onSuccess, onError }: Props) {
   }
 
   return (
-    <Card variant="outlined">
+    <Card
+      variant="outlined"
+      onClick={() => onViewDetails(task)}
+      sx={{ cursor: 'pointer', '&:hover': { borderColor: 'primary.main', boxShadow: 1 } }}
+    >
       <CardContent sx={{ '&:last-child': { pb: 2 } }}>
         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
           {task.title}
@@ -90,7 +95,7 @@ export default function TaskCard({ task, onSuccess, onError }: Props) {
             fullWidth
             sx={{ mt: 1.5 }}
             disabled={isPending}
-            onClick={handleAction}
+            onClick={(e) => { e.stopPropagation(); handleAction(); }}
           >
             {isPending ? '…' : actionLabel}
           </Button>

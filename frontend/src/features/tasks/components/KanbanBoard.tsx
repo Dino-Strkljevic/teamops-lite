@@ -12,6 +12,7 @@ import type { Task, TaskStatus } from '../types';
 import { useUpdateTaskStatus } from '../hooks/useUpdateTaskStatus';
 import DroppableColumn from './DroppableColumn';
 import TaskCard from './TaskCard';
+import TaskDetailsDrawer from './TaskDetailsDrawer';
 
 interface Column {
   status: TaskStatus;
@@ -34,8 +35,9 @@ interface Props {
 }
 
 export default function KanbanBoard({ tasks, onSuccess, onError }: Props) {
-  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
-  const [activeTask, setActiveTask] = useState<Task | null>(null);
+  const [localTasks, setLocalTasks]     = useState<Task[]>(tasks);
+  const [activeTask, setActiveTask]     = useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const { mutate } = useUpdateTaskStatus();
 
   useEffect(() => {
@@ -76,43 +78,54 @@ export default function KanbanBoard({ tasks, onSuccess, onError }: Props) {
   const byStatus = (status: TaskStatus) => localTasks.filter((t) => t.status === status);
 
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <Box
-        sx={{
-          display:             'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap:                 2,
-          alignItems:          'start',
-        }}
+    <>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
       >
-        {COLUMNS.map(({ status, label, color }) => (
-          <DroppableColumn
-            key={status}
-            status={status}
-            label={label}
-            color={color}
-            tasks={byStatus(status)}
-            onSuccess={onSuccess}
-            onError={onError}
-          />
-        ))}
-      </Box>
-
-      <DragOverlay dropAnimation={null}>
-        {activeTask && (
-          <div style={{ transform: 'rotate(2deg)', opacity: 0.95 }}>
-            <TaskCard
-              task={activeTask}
-              onSuccess={() => {}}
-              onError={() => {}}
+        <Box
+          sx={{
+            display:             'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap:                 2,
+            alignItems:          'start',
+          }}
+        >
+          {COLUMNS.map(({ status, label, color }) => (
+            <DroppableColumn
+              key={status}
+              status={status}
+              label={label}
+              color={color}
+              tasks={byStatus(status)}
+              onSuccess={onSuccess}
+              onError={onError}
+              onViewDetails={setSelectedTask}
             />
-          </div>
-        )}
-      </DragOverlay>
-    </DndContext>
+          ))}
+        </Box>
+
+        <DragOverlay dropAnimation={null}>
+          {activeTask && (
+            <div style={{ transform: 'rotate(2deg)', opacity: 0.95 }}>
+              <TaskCard
+                task={activeTask}
+                onSuccess={() => {}}
+                onError={() => {}}
+                onViewDetails={() => {}}
+              />
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
+
+      <TaskDetailsDrawer
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+        onEdit={() => {}}
+        onDelete={() => {}}
+      />
+    </>
   );
 }

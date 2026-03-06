@@ -4,12 +4,13 @@ import type { Task } from '../types';
 import TaskCard from './TaskCard';
 
 interface Props {
-  task:      Task;
-  onSuccess: () => void;
-  onError:   () => void;
+  task:          Task;
+  onSuccess:     () => void;
+  onError:       () => void;
+  onViewDetails: (task: Task) => void;
 }
 
-export default function DraggableTaskCard({ task, onSuccess, onError }: Props) {
+export default function DraggableTaskCard({ task, onSuccess, onError, onViewDetails }: Props) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id:   task.id,
     data: { task },
@@ -27,7 +28,12 @@ export default function DraggableTaskCard({ task, onSuccess, onError }: Props) {
         outline:    'none',
       }}
     >
-      <TaskCard task={task} onSuccess={onSuccess} onError={onError} />
+      <TaskCard
+        task={task}
+        onSuccess={onSuccess}
+        onError={onError}
+        onViewDetails={onViewDetails}
+      />
     </div>
   );
 }

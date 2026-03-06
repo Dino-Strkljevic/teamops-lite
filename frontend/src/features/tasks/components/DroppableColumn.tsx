@@ -4,15 +4,16 @@ import type { Task, TaskStatus } from '../types';
 import DraggableTaskCard from './DraggableTaskCard';
 
 interface Props {
-  status:    TaskStatus;
-  label:     string;
-  color:     string;
-  tasks:     Task[];
-  onSuccess: () => void;
-  onError:   () => void;
+  status:        TaskStatus;
+  label:         string;
+  color:         string;
+  tasks:         Task[];
+  onSuccess:     () => void;
+  onError:       () => void;
+  onViewDetails: (task: Task) => void;
 }
 
-export default function DroppableColumn({ status, label, color, tasks, onSuccess, onError }: Props) {
+export default function DroppableColumn({ status, label, color, tasks, onSuccess, onError, onViewDetails }: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -59,6 +60,7 @@ export default function DroppableColumn({ status, label, color, tasks, onSuccess
               task={task}
               onSuccess={onSuccess}
               onError={onError}
+              onViewDetails={onViewDetails}
             />
           ))
         )}
