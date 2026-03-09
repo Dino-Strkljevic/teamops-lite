@@ -1,16 +1,21 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '../../../lib/api';
-import { queryKeys } from '../../../lib/queryKeys';
-import type { Task, TaskStatus } from '../../../types/task';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import apiClient from "../../../lib/api";
+import { queryKeys } from "../../../lib/queryKeys";
+import type { Task, TaskStatus } from "../../../types/task";
 
 export interface UpdateTaskStatusArgs {
-  taskId:    string;
+  taskId: string;
   projectId: string;
-  status:    TaskStatus;
+  status: TaskStatus;
 }
 
-async function updateTaskStatus({ taskId, status }: UpdateTaskStatusArgs): Promise<Task> {
-  const { data } = await apiClient.patch<Task>(`/tasks/${taskId}/status`, { status });
+async function updateTaskStatus({
+  taskId,
+  status,
+}: UpdateTaskStatusArgs): Promise<Task> {
+  const { data } = await apiClient.patch<Task>(`/tasks/${taskId}/status`, {
+    status,
+  });
   return data;
 }
 
@@ -27,10 +32,12 @@ export function useUpdateTaskStatus() {
 
       const previous = queryClient.getQueryData<Task[]>(key);
 
-      queryClient.setQueryData<Task[]>(key, (old) =>
-        old?.map((t) =>
-          t.id === variables.taskId ? { ...t, status: variables.status } : t,
-        ) ?? [],
+      queryClient.setQueryData<Task[]>(
+        key,
+        (old) =>
+          old?.map((t) =>
+            t.id === variables.taskId ? { ...t, status: variables.status } : t,
+          ) ?? [],
       );
 
       return { previous };
@@ -39,15 +46,21 @@ export function useUpdateTaskStatus() {
     onSuccess: (updatedTask, variables) => {
       queryClient.setQueryData<Task[]>(
         queryKeys.tasks.byProject(variables.projectId),
-        (old) => old?.map((t) => (t.id === updatedTask.id ? updatedTask : t)) ?? [],
+        (old) =>
+          old?.map((t) => (t.id === updatedTask.id ? updatedTask : t)) ?? [],
       );
     },
 
     onError: (_error, variables, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData(queryKeys.tasks.byProject(variables.projectId), context.previous);
+        queryClient.setQueryData(
+          queryKeys.tasks.byProject(variables.projectId),
+          context.previous,
+        );
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(variables.projectId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byProject(variables.projectId),
+      });
     },
   });
 }

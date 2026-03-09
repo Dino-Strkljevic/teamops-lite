@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   Alert,
   Box,
@@ -13,40 +13,46 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
-import CloseIcon         from '@mui/icons-material/Close';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import EditOutlinedIcon  from '@mui/icons-material/EditOutlined';
-import ArrowBackIcon     from '@mui/icons-material/ArrowBack';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver }         from '@hookform/resolvers/zod';
-import { z }                   from 'zod';
-import type { Task } from '../types';
-import { useEditTask }      from '../hooks/useEditTask';
-import { useComments }      from '../hooks/useComments';
-import { useCreateComment } from '../hooks/useCreateComment';
-import DeleteTaskDialog  from './DeleteTaskDialog';
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import type { Task } from "../types";
+import { useEditTask } from "../hooks/useEditTask";
+import { useComments } from "../hooks/useComments";
+import { useCreateComment } from "../hooks/useCreateComment";
+import DeleteTaskDialog from "./DeleteTaskDialog";
 import {
   TASK_PRIORITIES,
   PRIORITY_LABEL,
   PRIORITY_COLOR,
   STATUS_LABEL,
   STATUS_COLOR,
-} from '../../../lib/constants';
+} from "../../../lib/constants";
 
 const DRAWER_WIDTH = 400;
 
 const editSchema = z.object({
-  title:       z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or fewer'),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(255, "Title must be 255 characters or fewer"),
   description: z.string().optional(),
-  priority:    z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-  dueDate:     z.string().optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+  dueDate: z.string().optional(),
 });
 
 type EditFormValues = z.infer<typeof editSchema>;
 
 const commentSchema = z.object({
-  body: z.string().min(1, 'Comment cannot be empty').max(10_000, 'Comment is too long'),
+  body: z
+    .string()
+    .min(1, "Comment cannot be empty")
+    .max(10_000, "Comment is too long"),
 });
 
 type CommentFormValues = z.infer<typeof commentSchema>;
@@ -55,7 +61,11 @@ function formatDate(iso: string | null | undefined): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function formatDateTime(iso: string | null | undefined): string | null {
@@ -63,18 +73,21 @@ function formatDateTime(iso: string | null | undefined): string | null {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
   return d.toLocaleString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: '2-digit', minute: '2-digit',
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
 function toDateInputValue(iso: string | null | undefined): string {
-  if (!iso) return '';
+  if (!iso) return "";
   return iso.slice(0, 10);
 }
 
 interface DetailRowProps {
-  label:    string;
+  label: string;
   children: React.ReactNode;
 }
 
@@ -85,7 +98,7 @@ function DetailRow({ label, children }: DetailRowProps) {
         variant="caption"
         color="text.secondary"
         fontWeight={600}
-        sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+        sx={{ textTransform: "uppercase", letterSpacing: 0.5 }}
       >
         {label}
       </Typography>
@@ -117,7 +130,7 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
     formState: { errors },
   } = useForm<CommentFormValues>({
     resolver: zodResolver(commentSchema),
-    defaultValues: { body: '' },
+    defaultValues: { body: "" },
   });
 
   function onSubmit(values: CommentFormValues) {
@@ -146,21 +159,25 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
           variant="caption"
           color="text.secondary"
           fontWeight={600}
-          sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+          sx={{ textTransform: "uppercase", letterSpacing: 0.5 }}
         >
           Comments
         </Typography>
       </Box>
 
       {isLoading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
           <CircularProgress size={20} />
         </Box>
       )}
 
       {isError && (
         <Box sx={{ px: 3, pb: 1 }}>
-          <Alert severity="error" variant="outlined" sx={{ fontSize: '0.8rem' }}>
+          <Alert
+            severity="error"
+            variant="outlined"
+            sx={{ fontSize: "0.8rem" }}
+          >
             Failed to load comments.
           </Alert>
         </Box>
@@ -169,7 +186,11 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
       {!isLoading && !isError && (
         <Stack spacing={1.5} sx={{ mx: 3, mb: 2 }}>
           {comments?.length === 0 && (
-            <Typography variant="body2" color="text.disabled" fontStyle="italic">
+            <Typography
+              variant="body2"
+              color="text.disabled"
+              fontStyle="italic"
+            >
               No comments yet.
             </Typography>
           )}
@@ -179,22 +200,43 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
               sx={{
                 px: 1.5,
                 py: 1.25,
-                border: '1px solid',
-                borderColor: 'divider',
+                border: "1px solid",
+                borderColor: "divider",
                 borderRadius: 1,
               }}
             >
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
-                <Typography variant="caption" fontWeight={600} color="text.primary" noWrap sx={{ maxWidth: '60%' }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  mb: 0.5,
+                }}
+              >
+                <Typography
+                  variant="caption"
+                  fontWeight={600}
+                  color="text.primary"
+                  noWrap
+                  sx={{ maxWidth: "60%" }}
+                >
                   {comment.authorDisplayName}
                 </Typography>
                 {comment.createdAt && (
-                  <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.disabled"
+                    sx={{ flexShrink: 0 }}
+                  >
                     {formatDateTime(comment.createdAt)}
                   </Typography>
                 )}
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+              >
                 {comment.body}
               </Typography>
             </Box>
@@ -214,7 +256,7 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
           multiline
           minRows={2}
           maxRows={6}
-          {...register('body')}
+          {...register("body")}
           error={!!errors.body}
           helperText={errors.body?.message}
           disabled={isPending}
@@ -222,13 +264,21 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
         />
 
         {postSuccess && (
-          <Alert severity="success" variant="outlined" sx={{ mb: 1, fontSize: '0.8rem' }}>
+          <Alert
+            severity="success"
+            variant="outlined"
+            sx={{ mb: 1, fontSize: "0.8rem" }}
+          >
             Comment posted.
           </Alert>
         )}
 
         {postError && (
-          <Alert severity="error" variant="outlined" sx={{ mb: 1, fontSize: '0.8rem' }}>
+          <Alert
+            severity="error"
+            variant="outlined"
+            sx={{ mb: 1, fontSize: "0.8rem" }}
+          >
             Failed to post comment. Please try again.
           </Alert>
         )}
@@ -238,9 +288,13 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
           variant="outlined"
           size="small"
           disabled={isPending}
-          startIcon={isPending ? <CircularProgress size={14} color="inherit" /> : undefined}
+          startIcon={
+            isPending ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : undefined
+          }
         >
-          {isPending ? 'Posting…' : 'Post'}
+          {isPending ? "Posting…" : "Post"}
         </Button>
       </Box>
     </Box>
@@ -248,22 +302,21 @@ function CommentsSection({ taskId }: CommentsSectionProps) {
 }
 
 interface ViewPanelProps {
-  task:     Task;
-  onEdit:   () => void;
+  task: Task;
+  onEdit: () => void;
   onDelete: () => void;
 }
 
 function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
-  const formattedDue       = formatDate(task.dueDate);
+  const formattedDue = formatDate(task.dueDate);
   const formattedCreatedAt = formatDateTime(task.createdAt);
   const formattedUpdatedAt = formatDateTime(task.updatedAt);
 
   return (
     <>
-      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+      <Box sx={{ flex: 1, overflowY: "auto" }}>
         <Stack spacing={3} sx={{ px: 3, py: 2.5 }}>
-
-          <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+          <Box sx={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
             <DetailRow label="Status">
               <Chip
                 label={STATUS_LABEL[task.status]}
@@ -284,11 +337,19 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
 
           <DetailRow label="Description">
             {task.description ? (
-              <Typography variant="body2" color="text.primary" sx={{ whiteSpace: 'pre-wrap' }}>
+              <Typography
+                variant="body2"
+                color="text.primary"
+                sx={{ whiteSpace: "pre-wrap" }}
+              >
                 {task.description}
               </Typography>
             ) : (
-              <Typography variant="body2" color="text.disabled" fontStyle="italic">
+              <Typography
+                variant="body2"
+                color="text.disabled"
+                fontStyle="italic"
+              >
                 No description provided.
               </Typography>
             )}
@@ -318,14 +379,13 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
               </DetailRow>
             )}
           </Stack>
-
         </Stack>
 
         <CommentsSection taskId={task.id} />
       </Box>
 
       <Divider />
-      <Box sx={{ display: 'flex', gap: 1.5, px: 3, py: 2 }}>
+      <Box sx={{ display: "flex", gap: 1.5, px: 3, py: 2 }}>
         <Button
           variant="contained"
           startIcon={<EditOutlinedIcon />}
@@ -349,10 +409,10 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
 }
 
 interface EditPanelProps {
-  task:      Task;
-  onCancel:  () => void;
+  task: Task;
+  onCancel: () => void;
   onSuccess: (updated: Task) => void;
-  onError:   () => void;
+  onError: () => void;
 }
 
 function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
@@ -366,28 +426,28 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
   } = useForm<EditFormValues>({
     resolver: zodResolver(editSchema),
     defaultValues: {
-      title:       task.title,
-      description: task.description ?? '',
-      priority:    task.priority,
-      dueDate:     toDateInputValue(task.dueDate),
+      title: task.title,
+      description: task.description ?? "",
+      priority: task.priority,
+      dueDate: toDateInputValue(task.dueDate),
     },
   });
 
   function onSubmit(values: EditFormValues) {
     mutate(
       {
-        taskId:    task.id,
+        taskId: task.id,
         projectId: task.projectId,
         body: {
-          title:       values.title,
+          title: values.title,
           description: values.description?.trim() || null,
-          priority:    values.priority,
-          dueDate:     values.dueDate || null,
+          priority: values.priority,
+          dueDate: values.dueDate || null,
         },
       },
       {
         onSuccess: (updated) => onSuccess(updated),
-        onError:   ()        => onError(),
+        onError: () => onError(),
       },
     );
   }
@@ -397,17 +457,16 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
       component="form"
       onSubmit={handleSubmit(onSubmit)}
       noValidate
-      sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
+      sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}
     >
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 3, py: 2.5 }}>
+      <Box sx={{ flex: 1, overflowY: "auto", px: 3, py: 2.5 }}>
         <Stack spacing={2.5}>
-
           <TextField
             label="Title"
             required
             fullWidth
             autoFocus
-            {...register('title')}
+            {...register("title")}
             error={!!errors.title}
             helperText={errors.title?.message}
             disabled={isPending}
@@ -418,7 +477,7 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
             fullWidth
             multiline
             minRows={4}
-            {...register('description')}
+            {...register("description")}
             error={!!errors.description}
             helperText={errors.description?.message}
             disabled={isPending}
@@ -451,25 +510,28 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
-            {...register('dueDate')}
+            {...register("dueDate")}
             error={!!errors.dueDate}
             helperText={errors.dueDate?.message}
             disabled={isPending}
           />
-
         </Stack>
       </Box>
 
       <Divider />
-      <Box sx={{ display: 'flex', gap: 1.5, px: 3, py: 2 }}>
+      <Box sx={{ display: "flex", gap: 1.5, px: 3, py: 2 }}>
         <Button
           type="submit"
           variant="contained"
           fullWidth
           disabled={isPending}
-          startIcon={isPending ? <CircularProgress size={16} color="inherit" /> : undefined}
+          startIcon={
+            isPending ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : undefined
+          }
         >
-          {isPending ? 'Saving…' : 'Save Changes'}
+          {isPending ? "Saving…" : "Save Changes"}
         </Button>
         <Button
           variant="outlined"
@@ -485,12 +547,12 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
 }
 
 export interface TaskDetailsDrawerProps {
-  task:            Task | null;
-  onClose:         () => void;
-  onEditSuccess:   (updated: Task) => void;
-  onEditError:     () => void;
+  task: Task | null;
+  onClose: () => void;
+  onEditSuccess: (updated: Task) => void;
+  onEditError: () => void;
   onDeleteSuccess: () => void;
-  onDeleteError:   () => void;
+  onDeleteError: () => void;
 }
 
 export default function TaskDetailsDrawer({
@@ -501,7 +563,7 @@ export default function TaskDetailsDrawer({
   onDeleteSuccess,
   onDeleteError,
 }: TaskDetailsDrawerProps) {
-  const [isEditing, setIsEditing]       = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   useEffect(() => {
@@ -531,7 +593,7 @@ export default function TaskDetailsDrawer({
     onDeleteError();
   }
 
-  const drawerTitle = isEditing ? 'Edit Task' : (task?.title ?? '');
+  const drawerTitle = isEditing ? "Edit Task" : (task?.title ?? "");
 
   return (
     <>
@@ -541,24 +603,31 @@ export default function TaskDetailsDrawer({
         onClose={handleClose}
         PaperProps={{
           sx: {
-            width:         { xs: '100vw', sm: DRAWER_WIDTH },
-            display:       'flex',
-            flexDirection: 'column',
+            width: { xs: "100vw", sm: DRAWER_WIDTH },
+            display: "flex",
+            flexDirection: "column",
           },
         }}
       >
         <Box
           sx={{
-            display:        'flex',
-            alignItems:     'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             px: 3,
             pt: 2.5,
             pb: 1.5,
             flexShrink: 0,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              minWidth: 0,
+            }}
+          >
             {isEditing && (
               <Tooltip title="Back to details">
                 <IconButton
@@ -574,10 +643,10 @@ export default function TaskDetailsDrawer({
               variant="h6"
               fontWeight={700}
               sx={{
-                lineHeight:   1.4,
-                overflow:     'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace:   'nowrap',
+                lineHeight: 1.4,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
               }}
             >
               {drawerTitle}
@@ -585,7 +654,11 @@ export default function TaskDetailsDrawer({
           </Box>
 
           <Tooltip title="Close">
-            <IconButton onClick={handleClose} size="small" sx={{ flexShrink: 0, ml: 1 }}>
+            <IconButton
+              onClick={handleClose}
+              size="small"
+              sx={{ flexShrink: 0, ml: 1 }}
+            >
               <CloseIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -593,8 +666,8 @@ export default function TaskDetailsDrawer({
 
         <Divider sx={{ flexShrink: 0 }} />
 
-        {task && (
-          isEditing ? (
+        {task &&
+          (isEditing ? (
             <EditPanel
               task={task}
               onCancel={() => setIsEditing(false)}
@@ -607,8 +680,7 @@ export default function TaskDetailsDrawer({
               onEdit={() => setIsEditing(true)}
               onDelete={() => setTaskToDelete(task)}
             />
-          )
-        )}
+          ))}
       </Drawer>
 
       <DeleteTaskDialog

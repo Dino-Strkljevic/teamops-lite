@@ -1,20 +1,26 @@
-import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
-import type { Task } from '../types';
-import TaskCard from './TaskCard';
+import { useDraggable } from "@dnd-kit/core";
+import { CSS } from "@dnd-kit/utilities";
+import type { Task } from "../types";
+import TaskCard from "./TaskCard";
 
 interface Props {
-  task:          Task;
-  onSuccess:     () => void;
-  onError:       () => void;
+  task: Task;
+  onSuccess: () => void;
+  onError: () => void;
   onViewDetails: (task: Task) => void;
 }
 
-export default function DraggableTaskCard({ task, onSuccess, onError, onViewDetails }: Props) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id:   task.id,
-    data: { task },
-  });
+export default function DraggableTaskCard({
+  task,
+  onSuccess,
+  onError,
+  onViewDetails,
+}: Props) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: task.id,
+      data: { task },
+    });
 
   return (
     <div
@@ -22,10 +28,10 @@ export default function DraggableTaskCard({ task, onSuccess, onError, onViewDeta
       {...attributes}
       {...listeners}
       style={{
-        transform:  CSS.Translate.toString(transform),
-        opacity:    isDragging ? 0 : 1,
-        cursor:     'grab',
-        outline:    'none',
+        transform: CSS.Translate.toString(transform),
+        opacity: isDragging ? 0 : 1,
+        cursor: "grab",
+        outline: "none",
       }}
     >
       <TaskCard

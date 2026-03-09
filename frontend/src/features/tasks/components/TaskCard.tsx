@@ -1,29 +1,41 @@
-import { Box, Button, Card, CardContent, Chip, Typography } from '@mui/material';
-import type { Task, TaskStatus } from '../types';
-import { useUpdateTaskStatus } from '../hooks/useUpdateTaskStatus';
-import { PRIORITY_LABEL, PRIORITY_COLOR } from '../../../lib/constants';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Typography,
+} from "@mui/material";
+import type { Task, TaskStatus } from "../types";
+import { useUpdateTaskStatus } from "../hooks/useUpdateTaskStatus";
+import { PRIORITY_LABEL, PRIORITY_COLOR } from "../../../lib/constants";
 
 const NEXT_STATUS: Partial<Record<TaskStatus, TaskStatus>> = {
-  TODO:        'IN_PROGRESS',
-  IN_PROGRESS: 'DONE',
+  TODO: "IN_PROGRESS",
+  IN_PROGRESS: "DONE",
 };
 
 const ACTION_LABEL: Partial<Record<TaskStatus, string>> = {
-  TODO:        'Start Task',
-  IN_PROGRESS: 'Mark Done',
+  TODO: "Start Task",
+  IN_PROGRESS: "Mark Done",
 };
 
 interface Props {
-  task:          Task;
-  onSuccess:     () => void;
-  onError:       () => void;
+  task: Task;
+  onSuccess: () => void;
+  onError: () => void;
   onViewDetails: (task: Task) => void;
 }
 
-export default function TaskCard({ task, onSuccess, onError, onViewDetails }: Props) {
+export default function TaskCard({
+  task,
+  onSuccess,
+  onError,
+  onViewDetails,
+}: Props) {
   const { mutate, isPending } = useUpdateTaskStatus();
 
-  const nextStatus  = NEXT_STATUS[task.status];
+  const nextStatus = NEXT_STATUS[task.status];
   const actionLabel = ACTION_LABEL[task.status];
 
   function handleAction() {
@@ -38,9 +50,12 @@ export default function TaskCard({ task, onSuccess, onError, onViewDetails }: Pr
     <Card
       variant="outlined"
       onClick={() => onViewDetails(task)}
-      sx={{ cursor: 'pointer', '&:hover': { borderColor: 'primary.main', boxShadow: 1 } }}
+      sx={{
+        cursor: "pointer",
+        "&:hover": { borderColor: "primary.main", boxShadow: 1 },
+      }}
     >
-      <CardContent sx={{ '&:last-child': { pb: 2 } }}>
+      <CardContent sx={{ "&:last-child": { pb: 2 } }}>
         <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
           {task.title}
         </Typography>
@@ -51,17 +66,24 @@ export default function TaskCard({ task, onSuccess, onError, onViewDetails }: Pr
             color="text.secondary"
             sx={{
               mb: 1,
-              display: '-webkit-box',
+              display: "-webkit-box",
               WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
             }}
           >
             {task.description}
           </Typography>
         )}
 
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mt: 1,
+          }}
+        >
           <Chip
             label={PRIORITY_LABEL[task.priority]}
             color={PRIORITY_COLOR[task.priority]}
@@ -82,9 +104,12 @@ export default function TaskCard({ task, onSuccess, onError, onViewDetails }: Pr
             fullWidth
             sx={{ mt: 1.5 }}
             disabled={isPending}
-            onClick={(e) => { e.stopPropagation(); handleAction(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleAction();
+            }}
           >
-            {isPending ? '…' : actionLabel}
+            {isPending ? "…" : actionLabel}
           </Button>
         )}
       </CardContent>

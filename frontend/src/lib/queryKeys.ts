@@ -12,15 +12,15 @@
  */
 export const queryKeys = {
   projects: {
-    all:    ()         => ['projects']                      as const,
-    list:   ()         => ['projects', 'list']              as const,
-    detail: (id: string) => ['projects', 'detail', id]     as const,
+    all: () => ["projects"] as const,
+    list: () => ["projects", "list"] as const,
+    detail: (id: string) => ["projects", "detail", id] as const,
   },
 
   tasks: {
-    all:       ()                   => ['tasks']                            as const,
-    byProject: (projectId: string)  => ['tasks', 'project', projectId]     as const,
-    detail:    (taskId: string)     => ['tasks', 'detail', taskId]          as const,
-    comments:  (taskId: string)     => ['tasks', 'comments', taskId]        as const,
+    all: () => ["tasks"] as const,
+    byProject: (projectId: string) => ["tasks", "project", projectId] as const,
+    detail: (taskId: string) => ["tasks", "detail", taskId] as const,
+    comments: (taskId: string) => ["tasks", "comments", taskId] as const,
   },
 } as const;

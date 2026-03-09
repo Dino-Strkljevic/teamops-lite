@@ -1,1 +1,7 @@
-export type { Task, TaskStatus, TaskPriority, CreateTaskBody, UpdateTaskBody } from '../../types/task';
+export type {
+  Task,
+  TaskStatus,
+  TaskPriority,
+  CreateTaskBody,
+  UpdateTaskBody,
+} from "../../types/task";

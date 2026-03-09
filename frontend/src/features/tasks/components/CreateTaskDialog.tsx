@@ -6,31 +6,40 @@ import {
   DialogTitle,
   MenuItem,
   TextField,
-} from '@mui/material';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useCreateTask } from '../hooks/useCreateTask';
-import { TASK_PRIORITIES, PRIORITY_LABEL } from '../../../lib/constants';
+} from "@mui/material";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useCreateTask } from "../hooks/useCreateTask";
+import { TASK_PRIORITIES, PRIORITY_LABEL } from "../../../lib/constants";
 
 const schema = z.object({
-  title:       z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or fewer'),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(255, "Title must be 255 characters or fewer"),
   description: z.string().optional(),
-  priority:    z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
-  dueDate:     z.string().optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
+  dueDate: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
 
 interface Props {
-  open:      boolean;
+  open: boolean;
   projectId: string;
-  onClose:   () => void;
+  onClose: () => void;
   onSuccess: () => void;
-  onError:   () => void;
+  onError: () => void;
 }
 
-export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, onError }: Props) {
+export default function CreateTaskDialog({
+  open,
+  projectId,
+  onClose,
+  onSuccess,
+  onError,
+}: Props) {
   const { mutate, isPending } = useCreateTask(projectId);
 
   const {
@@ -42,10 +51,10 @@ export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, 
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title:       '',
-      description: '',
-      priority:    'MEDIUM',
-      dueDate:     '',
+      title: "",
+      description: "",
+      priority: "MEDIUM",
+      dueDate: "",
     },
   });
 
@@ -58,10 +67,10 @@ export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, 
     mutate(
       {
         projectId,
-        title:       values.title,
+        title: values.title,
         description: values.description || null,
-        priority:    values.priority,
-        dueDate:     values.dueDate || null,
+        priority: values.priority,
+        dueDate: values.dueDate || null,
       },
       {
         onSuccess: () => {
@@ -80,13 +89,21 @@ export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <DialogTitle>New Task</DialogTitle>
 
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 3, overflow: 'visible' }}>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            pt: 3,
+            overflow: "visible",
+          }}
+        >
           <TextField
             label="Title"
             required
             autoFocus
             fullWidth
-            {...register('title')}
+            {...register("title")}
             error={!!errors.title}
             helperText={errors.title?.message}
           />
@@ -96,7 +113,7 @@ export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, 
             fullWidth
             multiline
             minRows={3}
-            {...register('description')}
+            {...register("description")}
             error={!!errors.description}
             helperText={errors.description?.message}
           />
@@ -127,7 +144,7 @@ export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, 
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
-            {...register('dueDate')}
+            {...register("dueDate")}
             error={!!errors.dueDate}
             helperText={errors.dueDate?.message}
           />
@@ -138,7 +155,7 @@ export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, 
             Cancel
           </Button>
           <Button type="submit" variant="contained" disabled={isPending}>
-            {isPending ? 'Creating…' : 'Create'}
+            {isPending ? "Creating…" : "Create"}
           </Button>
         </DialogActions>
       </form>

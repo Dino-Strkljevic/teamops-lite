@@ -1,12 +1,12 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '../../../lib/api';
-import { queryKeys } from '../../../lib/queryKeys';
-import type { Task, UpdateTaskBody } from '../../../types/task';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import apiClient from "../../../lib/api";
+import { queryKeys } from "../../../lib/queryKeys";
+import type { Task, UpdateTaskBody } from "../../../types/task";
 
 export interface EditTaskArgs {
-  taskId:    string;
+  taskId: string;
   projectId: string;
-  body:      UpdateTaskBody;
+  body: UpdateTaskBody;
 }
 
 async function editTask({ taskId, body }: EditTaskArgs): Promise<Task> {
@@ -26,10 +26,10 @@ export function useEditTask() {
 
       const previous = queryClient.getQueryData<Task[]>(key);
 
-      queryClient.setQueryData<Task[]>(key, (old) =>
-        old?.map((t) =>
-          t.id === taskId ? { ...t, ...body } : t,
-        ) ?? [],
+      queryClient.setQueryData<Task[]>(
+        key,
+        (old) =>
+          old?.map((t) => (t.id === taskId ? { ...t, ...body } : t)) ?? [],
       );
 
       return { previous };
@@ -38,16 +38,24 @@ export function useEditTask() {
     onSuccess: (updatedTask, { projectId }) => {
       queryClient.setQueryData<Task[]>(
         queryKeys.tasks.byProject(projectId),
-        (old) => old?.map((t) => (t.id === updatedTask.id ? updatedTask : t)) ?? [],
+        (old) =>
+          old?.map((t) => (t.id === updatedTask.id ? updatedTask : t)) ?? [],
       );
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byProject(projectId),
+      });
     },
 
     onError: (_err, { projectId }, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData(queryKeys.tasks.byProject(projectId), context.previous);
+        queryClient.setQueryData(
+          queryKeys.tasks.byProject(projectId),
+          context.previous,
+        );
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byProject(projectId),
+      });
     },
   });
 }

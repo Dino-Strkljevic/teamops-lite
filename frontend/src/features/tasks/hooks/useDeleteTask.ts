@@ -1,10 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '../../../lib/api';
-import { queryKeys } from '../../../lib/queryKeys';
-import type { Task } from '../../../types/task';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import apiClient from "../../../lib/api";
+import { queryKeys } from "../../../lib/queryKeys";
+import type { Task } from "../../../types/task";
 
 export interface DeleteTaskArgs {
-  taskId:    string;
+  taskId: string;
   projectId: string;
 }
 
@@ -24,11 +24,15 @@ export function useDeleteTask() {
         queryKeys.tasks.byProject(projectId),
         (old) => old?.filter((t) => t.id !== taskId) ?? [],
       );
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byProject(projectId),
+      });
     },
 
     onError: (_err, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.tasks.byProject(projectId),
+      });
     },
   });
 }

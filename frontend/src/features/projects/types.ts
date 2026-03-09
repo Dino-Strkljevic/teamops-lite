@@ -1,1 +1,1 @@
-export type { Project, CreateProjectBody } from '../../types/project';
+export type { Project, CreateProjectBody } from "../../types/project";

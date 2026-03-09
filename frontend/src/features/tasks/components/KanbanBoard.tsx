@@ -1,46 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core';
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
-import { Box } from '@mui/material';
-import type { Task, TaskStatus } from '../types';
-import { useUpdateTaskStatus } from '../hooks/useUpdateTaskStatus';
-import DroppableColumn from './DroppableColumn';
-import TaskCard from './TaskCard';
-import TaskDetailsDrawer from './TaskDetailsDrawer';
+} from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { Box } from "@mui/material";
+import type { Task, TaskStatus } from "../types";
+import { useUpdateTaskStatus } from "../hooks/useUpdateTaskStatus";
+import DroppableColumn from "./DroppableColumn";
+import TaskCard from "./TaskCard";
+import TaskDetailsDrawer from "./TaskDetailsDrawer";
 
 interface Column {
   status: TaskStatus;
-  label:  string;
-  color:  string;
+  label: string;
+  color: string;
 }
 
 const COLUMNS: Column[] = [
-  { status: 'TODO',        label: 'To Do',      color: 'text.secondary' },
-  { status: 'IN_PROGRESS', label: 'In Progress', color: 'info.main'      },
-  { status: 'DONE',        label: 'Done',        color: 'success.main'   },
+  { status: "TODO", label: "To Do", color: "text.secondary" },
+  { status: "IN_PROGRESS", label: "In Progress", color: "info.main" },
+  { status: "DONE", label: "Done", color: "success.main" },
 ];
 
 const COLUMN_STATUSES = new Set<string>(COLUMNS.map((c) => c.status));
 
 interface Props {
-  tasks:            Task[];
-  onSuccess:        () => void;
-  onError:          () => void;
-  onEditSuccess:    () => void;
-  onEditError:      () => void;
-  onDeleteSuccess:  () => void;
-  onDeleteError:    () => void;
+  tasks: Task[];
+  onSuccess: () => void;
+  onError: () => void;
+  onEditSuccess: () => void;
+  onEditError: () => void;
+  onDeleteSuccess: () => void;
+  onDeleteError: () => void;
 }
 
-export default function KanbanBoard({ tasks, onSuccess, onError, onEditSuccess, onEditError, onDeleteSuccess, onDeleteError }: Props) {
-  const [localTasks, setLocalTasks]     = useState<Task[]>(tasks);
-  const [activeTask, setActiveTask]     = useState<Task | null>(null);
+export default function KanbanBoard({
+  tasks,
+  onSuccess,
+  onError,
+  onEditSuccess,
+  onEditError,
+  onDeleteSuccess,
+  onDeleteError,
+}: Props) {
+  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const { mutate } = useUpdateTaskStatus();
 
@@ -62,16 +70,27 @@ export default function KanbanBoard({ tasks, onSuccess, onError, onEditSuccess, 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
-    const task      = active.data.current?.task as Task | undefined;
+    const task = active.data.current?.task as Task | undefined;
     const newStatus = over?.id as string | undefined;
 
-    if (task && newStatus && COLUMN_STATUSES.has(newStatus) && task.status !== newStatus) {
+    if (
+      task &&
+      newStatus &&
+      COLUMN_STATUSES.has(newStatus) &&
+      task.status !== newStatus
+    ) {
       setLocalTasks((prev) =>
-        prev.map((t) => (t.id === task.id ? { ...t, status: newStatus as TaskStatus } : t)),
+        prev.map((t) =>
+          t.id === task.id ? { ...t, status: newStatus as TaskStatus } : t,
+        ),
       );
 
       mutate(
-        { taskId: task.id, projectId: task.projectId, status: newStatus as TaskStatus },
+        {
+          taskId: task.id,
+          projectId: task.projectId,
+          status: newStatus as TaskStatus,
+        },
         { onSuccess, onError },
       );
     }
@@ -79,7 +98,8 @@ export default function KanbanBoard({ tasks, onSuccess, onError, onEditSuccess, 
     setActiveTask(null);
   }
 
-  const byStatus = (status: TaskStatus) => localTasks.filter((t) => t.status === status);
+  const byStatus = (status: TaskStatus) =>
+    localTasks.filter((t) => t.status === status);
 
   return (
     <>
@@ -90,10 +110,10 @@ export default function KanbanBoard({ tasks, onSuccess, onError, onEditSuccess, 
       >
         <Box
           sx={{
-            display:             'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap:                 2,
-            alignItems:          'start',
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 2,
+            alignItems: "start",
           }}
         >
           {COLUMNS.map(({ status, label, color }) => (
@@ -112,7 +132,7 @@ export default function KanbanBoard({ tasks, onSuccess, onError, onEditSuccess, 
 
         <DragOverlay dropAnimation={null}>
           {activeTask && (
-            <div style={{ transform: 'rotate(2deg)', opacity: 0.95 }}>
+            <div style={{ transform: "rotate(2deg)", opacity: 0.95 }}>
               <TaskCard
                 task={activeTask}
                 onSuccess={() => {}}

@@ -5,14 +5,17 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
-} from '@mui/material';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useCreateProject } from '../hooks/useCreateProject';
+} from "@mui/material";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useCreateProject } from "../hooks/useCreateProject";
 
 const schema = z.object({
-  name: z.string().min(1, 'Name is required').max(150, 'Name must be 150 characters or fewer'),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(150, "Name must be 150 characters or fewer"),
   description: z.string().max(1000).optional(),
 });
 
@@ -25,7 +28,12 @@ interface Props {
   onError: () => void;
 }
 
-export default function CreateProjectDialog({ open, onClose, onSuccess, onError }: Props) {
+export default function CreateProjectDialog({
+  open,
+  onClose,
+  onSuccess,
+  onError,
+}: Props) {
   const { mutate, isPending } = useCreateProject();
 
   const {
@@ -35,7 +43,7 @@ export default function CreateProjectDialog({ open, onClose, onSuccess, onError 
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', description: '' },
+    defaultValues: { name: "", description: "" },
   });
 
   function handleClose() {
@@ -66,13 +74,21 @@ export default function CreateProjectDialog({ open, onClose, onSuccess, onError 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <DialogTitle>New Project</DialogTitle>
 
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 3, overflow: 'visible' }}>
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            pt: 3,
+            overflow: "visible",
+          }}
+        >
           <TextField
             label="Name"
             required
             autoFocus
             fullWidth
-            {...register('name')}
+            {...register("name")}
             error={!!errors.name}
             helperText={errors.name?.message}
           />
@@ -81,7 +97,7 @@ export default function CreateProjectDialog({ open, onClose, onSuccess, onError 
             fullWidth
             multiline
             minRows={3}
-            {...register('description')}
+            {...register("description")}
             error={!!errors.description}
             helperText={errors.description?.message}
           />
@@ -92,7 +108,7 @@ export default function CreateProjectDialog({ open, onClose, onSuccess, onError 
             Cancel
           </Button>
           <Button type="submit" variant="contained" disabled={isPending}>
-            {isPending ? 'Creating…' : 'Create'}
+            {isPending ? "Creating…" : "Create"}
           </Button>
         </DialogActions>
       </form>
