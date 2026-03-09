@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  Alert,
   Box,
   Button,
   Chip,
@@ -21,7 +22,9 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver }         from '@hookform/resolvers/zod';
 import { z }                   from 'zod';
 import type { Task } from '../types';
-import { useEditTask }   from '../hooks/useEditTask';
+import { useEditTask }      from '../hooks/useEditTask';
+import { useComments }      from '../hooks/useComments';
+import { useCreateComment } from '../hooks/useCreateComment';
 import DeleteTaskDialog  from './DeleteTaskDialog';
 import {
   TASK_PRIORITIES,
@@ -30,8 +33,6 @@ import {
   STATUS_LABEL,
   STATUS_COLOR,
 } from '../../../lib/constants';
-
-// ── Constants ──────────────────────────────────────────────────────────────────
 
 const DRAWER_WIDTH = 400;
 
@@ -44,7 +45,11 @@ const editSchema = z.object({
 
 type EditFormValues = z.infer<typeof editSchema>;
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+const commentSchema = z.object({
+  body: z.string().min(1, 'Comment cannot be empty').max(10_000, 'Comment is too long'),
+});
+
+type CommentFormValues = z.infer<typeof commentSchema>;
 
 function formatDate(iso: string | null | undefined): string | null {
   if (!iso) return null;
@@ -63,13 +68,8 @@ function formatDateTime(iso: string | null | undefined): string | null {
   });
 }
 
-/**
- * Normalise an ISO timestamp or YYYY-MM-DD string to the "YYYY-MM-DD" format
- * that <input type="date"> requires. Returns '' when the value is absent.
- */
 function toDateInputValue(iso: string | null | undefined): string {
   if (!iso) return '';
-  // Timestamps like "2025-03-06T00:00:00Z" → slice to 10 chars
   return iso.slice(0, 10);
 }
 
@@ -94,6 +94,159 @@ function DetailRow({ label, children }: DetailRowProps) {
   );
 }
 
+interface CommentsSectionProps {
+  taskId: string;
+}
+
+function CommentsSection({ taskId }: CommentsSectionProps) {
+  const { data: comments, isLoading, isError } = useComments(taskId);
+  const { mutate, isPending } = useCreateComment(taskId);
+  const [postError, setPostError] = useState(false);
+  const [postSuccess, setPostSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!postSuccess) return;
+    const timer = setTimeout(() => setPostSuccess(false), 3000);
+    return () => clearTimeout(timer);
+  }, [postSuccess]);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CommentFormValues>({
+    resolver: zodResolver(commentSchema),
+    defaultValues: { body: '' },
+  });
+
+  function onSubmit(values: CommentFormValues) {
+    setPostError(false);
+    setPostSuccess(false);
+    mutate(
+      { body: values.body },
+      {
+        onSuccess: () => {
+          reset();
+          setPostSuccess(true);
+        },
+        onError: () => {
+          setPostError(true);
+        },
+      },
+    );
+  }
+
+  return (
+    <Box>
+      <Divider />
+
+      <Box sx={{ px: 3, pt: 2.5, pb: 1 }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          fontWeight={600}
+          sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+        >
+          Comments
+        </Typography>
+      </Box>
+
+      {isLoading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+          <CircularProgress size={20} />
+        </Box>
+      )}
+
+      {isError && (
+        <Box sx={{ px: 3, pb: 1 }}>
+          <Alert severity="error" variant="outlined" sx={{ fontSize: '0.8rem' }}>
+            Failed to load comments.
+          </Alert>
+        </Box>
+      )}
+
+      {!isLoading && !isError && (
+        <Stack spacing={1.5} sx={{ mx: 3, mb: 2 }}>
+          {comments?.length === 0 && (
+            <Typography variant="body2" color="text.disabled" fontStyle="italic">
+              No comments yet.
+            </Typography>
+          )}
+          {comments?.map((comment) => (
+            <Box
+              key={comment.id}
+              sx={{
+                px: 1.5,
+                py: 1.25,
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
+                <Typography variant="caption" fontWeight={600} color="text.primary" noWrap sx={{ maxWidth: '60%' }}>
+                  {comment.authorDisplayName}
+                </Typography>
+                {comment.createdAt && (
+                  <Typography variant="caption" color="text.disabled" sx={{ flexShrink: 0 }}>
+                    {formatDateTime(comment.createdAt)}
+                  </Typography>
+                )}
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                {comment.body}
+              </Typography>
+            </Box>
+          ))}
+        </Stack>
+      )}
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit(onSubmit)}
+        noValidate
+        sx={{ px: 3, pb: 2.5 }}
+      >
+        <TextField
+          label="Add a comment"
+          fullWidth
+          multiline
+          minRows={2}
+          maxRows={6}
+          {...register('body')}
+          error={!!errors.body}
+          helperText={errors.body?.message}
+          disabled={isPending}
+          sx={{ mb: 1 }}
+        />
+
+        {postSuccess && (
+          <Alert severity="success" variant="outlined" sx={{ mb: 1, fontSize: '0.8rem' }}>
+            Comment posted.
+          </Alert>
+        )}
+
+        {postError && (
+          <Alert severity="error" variant="outlined" sx={{ mb: 1, fontSize: '0.8rem' }}>
+            Failed to post comment. Please try again.
+          </Alert>
+        )}
+
+        <Button
+          type="submit"
+          variant="outlined"
+          size="small"
+          disabled={isPending}
+          startIcon={isPending ? <CircularProgress size={14} color="inherit" /> : undefined}
+        >
+          {isPending ? 'Posting…' : 'Post'}
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+
 interface ViewPanelProps {
   task:     Task;
   onEdit:   () => void;
@@ -107,11 +260,9 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
 
   return (
     <>
-      {/* Scrollable body */}
-      <Box sx={{ flex: 1, overflowY: 'auto', px: 3, py: 2.5 }}>
-        <Stack spacing={3}>
+      <Box sx={{ flex: 1, overflowY: 'auto' }}>
+        <Stack spacing={3} sx={{ px: 3, py: 2.5 }}>
 
-          {/* Status + Priority */}
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
             <DetailRow label="Status">
               <Chip
@@ -131,7 +282,6 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
             </DetailRow>
           </Box>
 
-          {/* Description */}
           <DetailRow label="Description">
             {task.description ? (
               <Typography variant="body2" color="text.primary" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -144,7 +294,6 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
             )}
           </DetailRow>
 
-          {/* Due date */}
           {formattedDue && (
             <DetailRow label="Due Date">
               <Typography variant="body2">{formattedDue}</Typography>
@@ -153,7 +302,6 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
 
           <Divider />
 
-          {/* Timestamps */}
           <Stack spacing={1.5}>
             {formattedCreatedAt && (
               <DetailRow label="Created">
@@ -172,9 +320,10 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
           </Stack>
 
         </Stack>
+
+        <CommentsSection taskId={task.id} />
       </Box>
 
-      {/* Footer */}
       <Divider />
       <Box sx={{ display: 'flex', gap: 1.5, px: 3, py: 2 }}>
         <Button
@@ -250,7 +399,6 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
       noValidate
       sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}
     >
-      {/* Scrollable fields */}
       <Box sx={{ flex: 1, overflowY: 'auto', px: 3, py: 2.5 }}>
         <Stack spacing={2.5}>
 
@@ -312,7 +460,6 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
         </Stack>
       </Box>
 
-      {/* Footer */}
       <Divider />
       <Box sx={{ display: 'flex', gap: 1.5, px: 3, py: 2 }}>
         <Button
@@ -337,7 +484,6 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
   );
 }
 
-
 export interface TaskDetailsDrawerProps {
   task:            Task | null;
   onClose:         () => void;
@@ -358,7 +504,6 @@ export default function TaskDetailsDrawer({
   const [isEditing, setIsEditing]       = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
-  // Reset edit mode whenever the selected task changes or the drawer closes
   useEffect(() => {
     setIsEditing(false);
   }, [task]);
@@ -377,7 +522,7 @@ export default function TaskDetailsDrawer({
 
   function handleDeleteSuccess() {
     setTaskToDelete(null);
-    onClose();           // close the drawer — the task no longer exists
+    onClose();
     onDeleteSuccess();
   }
 
@@ -402,7 +547,6 @@ export default function TaskDetailsDrawer({
           },
         }}
       >
-        {/* ── Header (always visible) ── */}
         <Box
           sx={{
             display:        'flex',
@@ -449,7 +593,6 @@ export default function TaskDetailsDrawer({
 
         <Divider sx={{ flexShrink: 0 }} />
 
-        {/* ── Body (swaps between view and edit) ── */}
         {task && (
           isEditing ? (
             <EditPanel

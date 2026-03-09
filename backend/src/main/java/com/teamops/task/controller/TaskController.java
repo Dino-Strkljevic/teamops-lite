@@ -2,11 +2,14 @@ package com.teamops.task.controller;
 
 import com.teamops.common.enums.TaskStatus;
 import com.teamops.task.dto.request.AssignTaskRequest;
+import com.teamops.task.dto.request.CreateCommentRequest;
 import com.teamops.task.dto.request.CreateTaskRequest;
 import com.teamops.task.dto.request.UpdateTaskRequest;
 import com.teamops.task.dto.request.UpdateTaskStatusRequest;
+import com.teamops.task.dto.response.CommentResponse;
 import com.teamops.task.dto.response.TaskResponse;
 import com.teamops.task.entity.Task;
+import com.teamops.task.service.TaskCommentService;
 import com.teamops.task.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,9 +23,11 @@ import java.util.UUID;
 public class TaskController {
 
     private final TaskService taskService;
+    private final TaskCommentService taskCommentService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, TaskCommentService taskCommentService) {
         this.taskService = taskService;
+        this.taskCommentService = taskCommentService;
     }
 
     @PostMapping
@@ -107,5 +112,24 @@ public class TaskController {
 
         Task task = taskService.assignTask(taskId, orgId, body.assigneeId());
         return TaskResponse.from(task);
+    }
+
+    @GetMapping("/{taskId}/comments")
+    public List<CommentResponse> listComments(
+            @RequestHeader("X-Org-Id") UUID orgId,
+            @PathVariable UUID taskId) {
+
+        return taskCommentService.getComments(taskId, orgId);
+    }
+
+    @PostMapping("/{taskId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentResponse createComment(
+            @RequestHeader("X-Org-Id")  UUID orgId,
+            @RequestHeader("X-User-Id") UUID userId,
+            @PathVariable UUID taskId,
+            @Valid @RequestBody CreateCommentRequest body) {
+
+        return taskCommentService.createComment(taskId, orgId, userId, body.body());
     }
 }

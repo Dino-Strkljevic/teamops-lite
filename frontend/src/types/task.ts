@@ -30,3 +30,13 @@ export interface UpdateTaskBody {
   priority:    TaskPriority;
   dueDate:     string | null;
 }
+
+export interface Comment {
+  id:                string;
+  taskId:            string;
+  orgId:             string;
+  authorId:          string;
+  authorDisplayName: string;
+  body:              string;
+  createdAt:         string;
+}
