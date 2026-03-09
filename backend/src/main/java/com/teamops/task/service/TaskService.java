@@ -11,127 +11,140 @@ import com.teamops.task.entity.Task;
 import com.teamops.task.repository.TaskRepository;
 import com.teamops.user.entity.User;
 import com.teamops.user.repository.UserRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TaskService {
 
-    private final TaskRepository taskRepository;
-    private final ProjectRepository projectRepository;
-    private final OrgRepository orgRepository;
-    private final UserRepository userRepository;
+  private final TaskRepository taskRepository;
+  private final ProjectRepository projectRepository;
+  private final OrgRepository orgRepository;
+  private final UserRepository userRepository;
 
-    public TaskService(TaskRepository taskRepository,
-                       ProjectRepository projectRepository,
-                       OrgRepository orgRepository,
-                       UserRepository userRepository) {
-        this.taskRepository = taskRepository;
-        this.projectRepository = projectRepository;
-        this.orgRepository = orgRepository;
-        this.userRepository = userRepository;
+  public TaskService(
+      TaskRepository taskRepository,
+      ProjectRepository projectRepository,
+      OrgRepository orgRepository,
+      UserRepository userRepository) {
+    this.taskRepository = taskRepository;
+    this.projectRepository = projectRepository;
+    this.orgRepository = orgRepository;
+    this.userRepository = userRepository;
+  }
+
+  @Transactional
+  public Task createTask(
+      UUID orgId,
+      UUID projectId,
+      UUID createdById,
+      String title,
+      String description,
+      TaskStatus status,
+      TaskPriority priority,
+      LocalDate dueDate) {
+    Org org = EntityLookup.findById(orgRepository, orgId, "Org");
+
+    Project project =
+        projectRepository
+            .findByIdAndOrgId(projectId, orgId)
+            .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+
+    User createdBy = EntityLookup.findById(userRepository, createdById, "User");
+
+    Task task = new Task();
+    task.setOrg(org);
+    task.setProject(project);
+    task.setCreatedBy(createdBy);
+    task.setTitle(title);
+    task.setDescription(description);
+    task.setStatus(status);
+    task.setPriority(priority);
+    task.setDueDate(dueDate);
+
+    return taskRepository.save(task);
+  }
+
+  @Transactional(readOnly = true)
+  public List<Task> getTasksByProject(UUID orgId, UUID projectId) {
+    if (!projectRepository.findByIdAndOrgId(projectId, orgId).isPresent()) {
+      throw new IllegalArgumentException("Project not found: " + projectId);
     }
+    return taskRepository.findByOrgIdAndProjectId(orgId, projectId);
+  }
 
-    @Transactional
-    public Task createTask(UUID orgId,
-                           UUID projectId,
-                           UUID createdById,
-                           String title,
-                           String description,
-                           TaskStatus status,
-                           TaskPriority priority,
-                           LocalDate dueDate) {
-        Org org = EntityLookup.findById(orgRepository, orgId, "Org");
-
-        Project project = projectRepository.findByIdAndOrgId(projectId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
-
-        User createdBy = EntityLookup.findById(userRepository, createdById, "User");
-
-        Task task = new Task();
-        task.setOrg(org);
-        task.setProject(project);
-        task.setCreatedBy(createdBy);
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setStatus(status);
-        task.setPriority(priority);
-        task.setDueDate(dueDate);
-
-        return taskRepository.save(task);
+  @Transactional(readOnly = true)
+  public List<Task> getTasksByOrg(UUID orgId) {
+    if (!orgRepository.existsById(orgId)) {
+      throw new IllegalArgumentException("Org not found: " + orgId);
     }
+    return taskRepository.findByOrgId(orgId);
+  }
 
-    @Transactional(readOnly = true)
-    public List<Task> getTasksByProject(UUID orgId, UUID projectId) {
-        if (!projectRepository.findByIdAndOrgId(projectId, orgId).isPresent()) {
-            throw new IllegalArgumentException("Project not found: " + projectId);
-        }
-        return taskRepository.findByOrgIdAndProjectId(orgId, projectId);
-    }
+  @Transactional
+  public Task assignTask(UUID taskId, UUID orgId, UUID assigneeId) {
+    Task task =
+        taskRepository
+            .findByIdAndOrgId(taskId, orgId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-    @Transactional(readOnly = true)
-    public List<Task> getTasksByOrg(UUID orgId) {
-        if (!orgRepository.existsById(orgId)) {
-            throw new IllegalArgumentException("Org not found: " + orgId);
-        }
-        return taskRepository.findByOrgId(orgId);
-    }
+    User assignee = EntityLookup.findById(userRepository, assigneeId, "User");
 
-    @Transactional
-    public Task assignTask(UUID taskId, UUID orgId, UUID assigneeId) {
-        Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+    task.setAssignee(assignee);
 
-        User assignee = EntityLookup.findById(userRepository, assigneeId, "User");
+    return taskRepository.save(task);
+  }
 
-        task.setAssignee(assignee);
+  @Transactional
+  public Task updateStatus(UUID taskId, UUID orgId, TaskStatus status) {
+    Task task =
+        taskRepository
+            .findByIdAndOrgId(taskId, orgId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-        return taskRepository.save(task);
-    }
+    task.setStatus(status);
 
-    @Transactional
-    public Task updateStatus(UUID taskId, UUID orgId, TaskStatus status) {
-        Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+    return taskRepository.save(task);
+  }
 
-        task.setStatus(status);
+  @Transactional
+  public Task updateTask(
+      UUID taskId,
+      UUID orgId,
+      String title,
+      String description,
+      TaskPriority priority,
+      LocalDate dueDate) {
+    Task task =
+        taskRepository
+            .findByIdAndOrgId(taskId, orgId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-        return taskRepository.save(task);
-    }
+    task.setTitle(title);
+    task.setDescription(description);
+    task.setPriority(priority);
+    task.setDueDate(dueDate);
 
-    @Transactional
-    public Task updateTask(UUID taskId,
-                           UUID orgId,
-                           String title,
-                           String description,
-                           TaskPriority priority,
-                           LocalDate dueDate) {
-        Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+    return taskRepository.save(task);
+  }
 
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setPriority(priority);
-        task.setDueDate(dueDate);
+  @Transactional
+  public void deleteTask(UUID taskId, UUID orgId) {
+    Task task =
+        taskRepository
+            .findByIdAndOrgId(taskId, orgId)
+            .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-        return taskRepository.save(task);
-    }
+    taskRepository.delete(task);
+  }
 
-    @Transactional
-    public void deleteTask(UUID taskId, UUID orgId) {
-        Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
-
-        taskRepository.delete(task);
-    }
-
-    @Transactional(readOnly = true)
-    public Task getTaskById(UUID taskId, UUID orgId) {
-        return taskRepository.findByIdAndOrgId(taskId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
-    }
+  @Transactional(readOnly = true)
+  public Task getTaskById(UUID taskId, UUID orgId) {
+    return taskRepository
+        .findByIdAndOrgId(taskId, orgId)
+        .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
+  }
 }

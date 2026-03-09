@@ -2,23 +2,22 @@ package com.teamops.task.repository;
 
 import com.teamops.common.enums.TaskStatus;
 import com.teamops.task.entity.Task;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TaskRepository extends JpaRepository<Task, UUID> {
 
-    List<Task> findByOrgId(UUID orgId);
+  List<Task> findByOrgId(UUID orgId);
 
-    List<Task> findByProjectId(UUID projectId);
+  List<Task> findByProjectId(UUID projectId);
 
-    List<Task> findByOrgIdAndProjectId(UUID orgId, UUID projectId);
+  List<Task> findByOrgIdAndProjectId(UUID orgId, UUID projectId);
 
-    List<Task> findByOrgIdAndStatus(UUID orgId, TaskStatus status);
+  List<Task> findByOrgIdAndStatus(UUID orgId, TaskStatus status);
 
-    List<Task> findByAssigneeId(UUID assigneeId);
+  List<Task> findByAssigneeId(UUID assigneeId);
 
-    Optional<Task> findByIdAndOrgId(UUID id, UUID orgId);
+  Optional<Task> findByIdAndOrgId(UUID id, UUID orgId);
 }

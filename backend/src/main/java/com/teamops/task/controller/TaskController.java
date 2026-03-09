@@ -12,124 +12,115 @@ import com.teamops.task.entity.Task;
 import com.teamops.task.service.TaskCommentService;
 import com.teamops.task.service.TaskService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/tasks")
 public class TaskController {
 
-    private final TaskService taskService;
-    private final TaskCommentService taskCommentService;
+  private final TaskService taskService;
+  private final TaskCommentService taskCommentService;
 
-    public TaskController(TaskService taskService, TaskCommentService taskCommentService) {
-        this.taskService = taskService;
-        this.taskCommentService = taskCommentService;
+  public TaskController(TaskService taskService, TaskCommentService taskCommentService) {
+    this.taskService = taskService;
+    this.taskCommentService = taskCommentService;
+  }
+
+  @PostMapping
+  @ResponseStatus(HttpStatus.CREATED)
+  public TaskResponse create(
+      @RequestHeader("X-Org-Id") UUID orgId,
+      @RequestHeader("X-User-Id") UUID userId,
+      @Valid @RequestBody CreateTaskRequest body) {
+
+    Task task =
+        taskService.createTask(
+            orgId,
+            body.projectId(),
+            userId,
+            body.title(),
+            body.description(),
+            TaskStatus.TODO,
+            body.priority(),
+            body.dueDate());
+
+    if (body.assigneeId() != null) {
+      task = taskService.assignTask(task.getId(), orgId, body.assigneeId());
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public TaskResponse create(
-            @RequestHeader("X-Org-Id")  UUID orgId,
-            @RequestHeader("X-User-Id") UUID userId,
-            @Valid @RequestBody CreateTaskRequest body) {
+    return TaskResponse.from(task);
+  }
 
-        Task task = taskService.createTask(
-                orgId,
-                body.projectId(),
-                userId,
-                body.title(),
-                body.description(),
-                TaskStatus.TODO,
-                body.priority(),
-                body.dueDate()
-        );
+  @GetMapping
+  public List<TaskResponse> list(
+      @RequestHeader("X-Org-Id") UUID orgId, @RequestParam(required = false) UUID projectId) {
 
-        if (body.assigneeId() != null) {
-            task = taskService.assignTask(task.getId(), orgId, body.assigneeId());
-        }
+    List<Task> tasks =
+        (projectId != null)
+            ? taskService.getTasksByProject(orgId, projectId)
+            : taskService.getTasksByOrg(orgId);
 
-        return TaskResponse.from(task);
-    }
+    return tasks.stream().map(TaskResponse::from).toList();
+  }
 
-    @GetMapping
-    public List<TaskResponse> list(
-            @RequestHeader("X-Org-Id") UUID orgId,
-            @RequestParam(required = false) UUID projectId) {
+  @PatchMapping("/{taskId}")
+  public TaskResponse updateTask(
+      @RequestHeader("X-Org-Id") UUID orgId,
+      @PathVariable UUID taskId,
+      @Valid @RequestBody UpdateTaskRequest body) {
 
-        List<Task> tasks = (projectId != null)
-                ? taskService.getTasksByProject(orgId, projectId)
-                : taskService.getTasksByOrg(orgId);
+    Task task =
+        taskService.updateTask(
+            taskId, orgId, body.title(), body.description(), body.priority(), body.dueDate());
 
-        return tasks.stream().map(TaskResponse::from).toList();
-    }
+    return TaskResponse.from(task);
+  }
 
-    @PatchMapping("/{taskId}")
-    public TaskResponse updateTask(
-            @RequestHeader("X-Org-Id") UUID orgId,
-            @PathVariable UUID taskId,
-            @Valid @RequestBody UpdateTaskRequest body) {
+  @DeleteMapping("/{taskId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteTask(@RequestHeader("X-Org-Id") UUID orgId, @PathVariable UUID taskId) {
 
-        Task task = taskService.updateTask(
-                taskId,
-                orgId,
-                body.title(),
-                body.description(),
-                body.priority(),
-                body.dueDate()
-        );
+    taskService.deleteTask(taskId, orgId);
+  }
 
-        return TaskResponse.from(task);
-    }
+  @PatchMapping("/{taskId}/status")
+  public TaskResponse updateStatus(
+      @RequestHeader("X-Org-Id") UUID orgId,
+      @PathVariable UUID taskId,
+      @Valid @RequestBody UpdateTaskStatusRequest body) {
 
-    @DeleteMapping("/{taskId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTask(
-            @RequestHeader("X-Org-Id") UUID orgId,
-            @PathVariable UUID taskId) {
+    Task task = taskService.updateStatus(taskId, orgId, body.status());
+    return TaskResponse.from(task);
+  }
 
-        taskService.deleteTask(taskId, orgId);
-    }
+  @PatchMapping("/{taskId}/assignee")
+  public TaskResponse assignTask(
+      @RequestHeader("X-Org-Id") UUID orgId,
+      @PathVariable UUID taskId,
+      @Valid @RequestBody AssignTaskRequest body) {
 
-    @PatchMapping("/{taskId}/status")
-    public TaskResponse updateStatus(
-            @RequestHeader("X-Org-Id") UUID orgId,
-            @PathVariable UUID taskId,
-            @Valid @RequestBody UpdateTaskStatusRequest body) {
+    Task task = taskService.assignTask(taskId, orgId, body.assigneeId());
+    return TaskResponse.from(task);
+  }
 
-        Task task = taskService.updateStatus(taskId, orgId, body.status());
-        return TaskResponse.from(task);
-    }
+  @GetMapping("/{taskId}/comments")
+  public List<CommentResponse> listComments(
+      @RequestHeader("X-Org-Id") UUID orgId, @PathVariable UUID taskId) {
 
-    @PatchMapping("/{taskId}/assignee")
-    public TaskResponse assignTask(
-            @RequestHeader("X-Org-Id") UUID orgId,
-            @PathVariable UUID taskId,
-            @Valid @RequestBody AssignTaskRequest body) {
+    return taskCommentService.getComments(taskId, orgId);
+  }
 
-        Task task = taskService.assignTask(taskId, orgId, body.assigneeId());
-        return TaskResponse.from(task);
-    }
+  @PostMapping("/{taskId}/comments")
+  @ResponseStatus(HttpStatus.CREATED)
+  public CommentResponse createComment(
+      @RequestHeader("X-Org-Id") UUID orgId,
+      @RequestHeader("X-User-Id") UUID userId,
+      @PathVariable UUID taskId,
+      @Valid @RequestBody CreateCommentRequest body) {
 
-    @GetMapping("/{taskId}/comments")
-    public List<CommentResponse> listComments(
-            @RequestHeader("X-Org-Id") UUID orgId,
-            @PathVariable UUID taskId) {
-
-        return taskCommentService.getComments(taskId, orgId);
-    }
-
-    @PostMapping("/{taskId}/comments")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CommentResponse createComment(
-            @RequestHeader("X-Org-Id")  UUID orgId,
-            @RequestHeader("X-User-Id") UUID userId,
-            @PathVariable UUID taskId,
-            @Valid @RequestBody CreateCommentRequest body) {
-
-        return taskCommentService.createComment(taskId, orgId, userId, body.body());
-    }
+    return taskCommentService.createComment(taskId, orgId, userId, body.body());
+  }
 }
