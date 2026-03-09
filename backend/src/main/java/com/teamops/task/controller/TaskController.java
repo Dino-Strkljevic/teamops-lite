@@ -1,12 +1,12 @@
 package com.teamops.task.controller;
 
-import com.teamops.task.controller.dto.AssignTaskRequest;
-import com.teamops.task.controller.dto.CreateTaskRequest;
-import com.teamops.task.controller.dto.TaskResponse;
-import com.teamops.task.controller.dto.UpdateTaskRequest;
-import com.teamops.task.controller.dto.UpdateTaskStatusRequest;
+import com.teamops.common.enums.TaskStatus;
+import com.teamops.task.dto.request.AssignTaskRequest;
+import com.teamops.task.dto.request.CreateTaskRequest;
+import com.teamops.task.dto.request.UpdateTaskRequest;
+import com.teamops.task.dto.request.UpdateTaskStatusRequest;
+import com.teamops.task.dto.response.TaskResponse;
 import com.teamops.task.entity.Task;
-import com.teamops.task.entity.TaskStatus;
 import com.teamops.task.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

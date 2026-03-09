@@ -1,6 +1,8 @@
 package com.teamops.task.entity;
 
 import com.teamops.common.entity.Auditable;
+import com.teamops.common.enums.TaskPriority;
+import com.teamops.common.enums.TaskStatus;
 import com.teamops.org.entity.Org;
 import com.teamops.project.entity.Project;
 import com.teamops.user.entity.User;

@@ -1,6 +1,6 @@
-package com.teamops.task.controller.dto;
+package com.teamops.task.dto.request;
 
-import com.teamops.task.entity.TaskPriority;
+import com.teamops.common.enums.TaskPriority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

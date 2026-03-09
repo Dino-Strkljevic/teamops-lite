@@ -1,6 +1,6 @@
-package com.teamops.task.controller.dto;
+package com.teamops.task.dto.request;
 
-import com.teamops.task.entity.TaskStatus;
+import com.teamops.common.enums.TaskStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record UpdateTaskStatusRequest(

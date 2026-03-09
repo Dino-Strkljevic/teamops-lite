@@ -1,8 +1,8 @@
-package com.teamops.task.controller.dto;
+package com.teamops.task.dto.response;
 
+import com.teamops.common.enums.TaskPriority;
+import com.teamops.common.enums.TaskStatus;
 import com.teamops.task.entity.Task;
-import com.teamops.task.entity.TaskPriority;
-import com.teamops.task.entity.TaskStatus;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,8 +32,8 @@ public record TaskResponse(
                 t.getStatus(),
                 t.getPriority(),
                 t.getDueDate(),
-                t.getAssignee()   != null ? t.getAssignee().getId()   : null,
-                t.getCreatedBy()  != null ? t.getCreatedBy().getId()  : null,
+                t.getAssignee()  != null ? t.getAssignee().getId()  : null,
+                t.getCreatedBy() != null ? t.getCreatedBy().getId() : null,
                 t.getCreatedAt(),
                 t.getUpdatedAt()
         );

@@ -1,4 +1,4 @@
-package com.teamops.task.controller.dto;
+package com.teamops.task.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 

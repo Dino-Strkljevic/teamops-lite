@@ -1,12 +1,13 @@
 package com.teamops.task.service;
 
+import com.teamops.common.enums.TaskPriority;
+import com.teamops.common.enums.TaskStatus;
+import com.teamops.common.util.EntityLookup;
 import com.teamops.org.entity.Org;
 import com.teamops.org.repository.OrgRepository;
 import com.teamops.project.entity.Project;
 import com.teamops.project.repository.ProjectRepository;
 import com.teamops.task.entity.Task;
-import com.teamops.task.entity.TaskPriority;
-import com.teamops.task.entity.TaskStatus;
 import com.teamops.task.repository.TaskRepository;
 import com.teamops.user.entity.User;
 import com.teamops.user.repository.UserRepository;
@@ -44,14 +45,12 @@ public class TaskService {
                            TaskStatus status,
                            TaskPriority priority,
                            LocalDate dueDate) {
-        Org org = orgRepository.findById(orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Org not found: " + orgId));
+        Org org = EntityLookup.findById(orgRepository, orgId, "Org");
 
         Project project = projectRepository.findByIdAndOrgId(projectId, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
 
-        User createdBy = userRepository.findById(createdById)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + createdById));
+        User createdBy = EntityLookup.findById(userRepository, createdById, "User");
 
         Task task = new Task();
         task.setOrg(org);
@@ -87,8 +86,7 @@ public class TaskService {
         Task task = taskRepository.findByIdAndOrgId(taskId, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("Task not found: " + taskId));
 
-        User assignee = userRepository.findById(assigneeId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + assigneeId));
+        User assignee = EntityLookup.findById(userRepository, assigneeId, "User");
 
         task.setAssignee(assignee);
 

@@ -1,7 +1,7 @@
 package com.teamops.project.controller;
 
-import com.teamops.project.controller.dto.CreateProjectRequest;
-import com.teamops.project.controller.dto.ProjectResponse;
+import com.teamops.project.dto.request.CreateProjectRequest;
+import com.teamops.project.dto.response.ProjectResponse;
 import com.teamops.project.entity.Project;
 import com.teamops.project.service.ProjectService;
 import jakarta.validation.Valid;
@@ -54,7 +54,6 @@ public class ProjectController {
 
         Project project = projectService.getProjectById(projectId);
 
-        // Tenant guard — reject if project belongs to a different org
         if (!project.getOrg().getId().equals(orgId)) {
             throw new IllegalArgumentException("Project not found: " + projectId);
         }

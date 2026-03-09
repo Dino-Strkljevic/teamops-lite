@@ -1,4 +1,4 @@
-package com.teamops.org.entity;
+package com.teamops.common.enums;
 
 public enum OrgRole {
     OWNER,

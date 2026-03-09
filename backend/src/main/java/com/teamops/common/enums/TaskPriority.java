@@ -1,4 +1,4 @@
-package com.teamops.task.entity;
+package com.teamops.common.enums;
 
 public enum TaskPriority {
     LOW,

@@ -1,7 +1,7 @@
 package com.teamops.task.repository;
 
+import com.teamops.common.enums.TaskStatus;
 import com.teamops.task.entity.Task;
-import com.teamops.task.entity.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

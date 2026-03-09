@@ -1,6 +1,7 @@
 package com.teamops.org.entity;
 
 import com.teamops.common.entity.Auditable;
+import com.teamops.common.enums.OrgRole;
 import com.teamops.user.entity.User;
 import jakarta.persistence.*;
 

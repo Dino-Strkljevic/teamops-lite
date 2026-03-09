@@ -1,7 +1,7 @@
 package com.teamops.org.repository;
 
+import com.teamops.common.enums.OrgRole;
 import com.teamops.org.entity.OrgMembership;
-import com.teamops.org.entity.OrgRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

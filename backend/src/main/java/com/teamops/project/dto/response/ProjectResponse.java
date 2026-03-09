@@ -1,4 +1,4 @@
-package com.teamops.project.controller.dto;
+package com.teamops.project.dto.response;
 
 import com.teamops.project.entity.Project;
 

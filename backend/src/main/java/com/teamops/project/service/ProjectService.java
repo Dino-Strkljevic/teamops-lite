@@ -1,5 +1,6 @@
 package com.teamops.project.service;
 
+import com.teamops.common.util.EntityLookup;
 import com.teamops.org.entity.Org;
 import com.teamops.org.repository.OrgRepository;
 import com.teamops.project.entity.Project;
@@ -29,11 +30,8 @@ public class ProjectService {
 
     @Transactional
     public Project createProject(UUID orgId, UUID createdById, String name, String description) {
-        Org org = orgRepository.findById(orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Org not found: " + orgId));
-
-        User createdBy = userRepository.findById(createdById)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + createdById));
+        Org org = EntityLookup.findById(orgRepository, orgId, "Org");
+        User createdBy = EntityLookup.findById(userRepository, createdById, "User");
 
         Project project = new Project();
         project.setOrg(org);
@@ -54,7 +52,6 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public Project getProjectById(UUID projectId) {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + projectId));
+        return EntityLookup.findById(projectRepository, projectId, "Project");
     }
 }
