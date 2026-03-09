@@ -1,11 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../../lib/api';
-import type { Project } from '../types';
-
-export const projectKeys = {
-  all: ['projects'] as const,
-  list: () => [...projectKeys.all, 'list'] as const,
-};
+import { queryKeys } from '../../../lib/queryKeys';
+import type { Project } from '../../../types/project';
 
 async function fetchProjects(): Promise<Project[]> {
   const { data } = await apiClient.get<Project[]>('/projects');
@@ -14,7 +10,7 @@ async function fetchProjects(): Promise<Project[]> {
 
 export function useProjects() {
   return useQuery({
-    queryKey: projectKeys.list(),
-    queryFn: fetchProjects,
+    queryKey: queryKeys.projects.list(),
+    queryFn:  fetchProjects,
   });
 }

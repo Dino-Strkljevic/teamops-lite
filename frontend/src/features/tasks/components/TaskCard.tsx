@@ -1,20 +1,7 @@
 import { Box, Button, Card, CardContent, Chip, Typography } from '@mui/material';
-import type { Task, TaskPriority, TaskStatus } from '../types';
+import type { Task, TaskStatus } from '../types';
 import { useUpdateTaskStatus } from '../hooks/useUpdateTaskStatus';
-
-const PRIORITY_COLOR: Record<TaskPriority, 'default' | 'success' | 'warning' | 'error'> = {
-  LOW:      'success',
-  MEDIUM:   'default',
-  HIGH:     'warning',
-  CRITICAL: 'error',
-};
-
-const PRIORITY_LABEL: Record<TaskPriority, string> = {
-  LOW:      'Low',
-  MEDIUM:   'Medium',
-  HIGH:     'High',
-  CRITICAL: 'Critical',
-};
+import { PRIORITY_LABEL, PRIORITY_COLOR } from '../../../lib/constants';
 
 const NEXT_STATUS: Partial<Record<TaskStatus, TaskStatus>> = {
   TODO:        'IN_PROGRESS',
@@ -36,7 +23,7 @@ interface Props {
 export default function TaskCard({ task, onSuccess, onError, onViewDetails }: Props) {
   const { mutate, isPending } = useUpdateTaskStatus();
 
-  const nextStatus = NEXT_STATUS[task.status];
+  const nextStatus  = NEXT_STATUS[task.status];
   const actionLabel = ACTION_LABEL[task.status];
 
   function handleAction() {

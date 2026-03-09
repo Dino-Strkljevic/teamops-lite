@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../../lib/api';
-import { taskKeys } from './useTasks';
-import type { Task, TaskStatus } from '../types';
+import { queryKeys } from '../../../lib/queryKeys';
+import type { Task, TaskStatus } from '../../../types/task';
 
 export interface UpdateTaskStatusArgs {
   taskId:    string;
@@ -21,7 +21,7 @@ export function useUpdateTaskStatus() {
     mutationFn: updateTaskStatus,
 
     onMutate: async (variables) => {
-      const key = taskKeys.byProject(variables.projectId);
+      const key = queryKeys.tasks.byProject(variables.projectId);
 
       await queryClient.cancelQueries({ queryKey: key });
 
@@ -38,16 +38,16 @@ export function useUpdateTaskStatus() {
 
     onSuccess: (updatedTask, variables) => {
       queryClient.setQueryData<Task[]>(
-        taskKeys.byProject(variables.projectId),
+        queryKeys.tasks.byProject(variables.projectId),
         (old) => old?.map((t) => (t.id === updatedTask.id ? updatedTask : t)) ?? [],
       );
     },
 
     onError: (_error, variables, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData(taskKeys.byProject(variables.projectId), context.previous);
+        queryClient.setQueryData(queryKeys.tasks.byProject(variables.projectId), context.previous);
       }
-      queryClient.invalidateQueries({ queryKey: taskKeys.byProject(variables.projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(variables.projectId) });
     },
   });
 }

@@ -1,15 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../../lib/api';
-import { taskKeys } from './useTasks';
-import type { Task, TaskPriority } from '../types';
-
-export interface CreateTaskBody {
-  projectId: string;
-  title: string;
-  description: string | null;
-  priority: TaskPriority;
-  dueDate: string | null;
-}
+import { queryKeys } from '../../../lib/queryKeys';
+import type { Task, CreateTaskBody } from '../../../types/task';
 
 async function createTask(body: CreateTaskBody): Promise<Task> {
   const { data } = await apiClient.post<Task>('/tasks', body);
@@ -22,7 +14,7 @@ export function useCreateTask(projectId: string) {
   return useMutation({
     mutationFn: createTask,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: taskKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
     },
   });
 }

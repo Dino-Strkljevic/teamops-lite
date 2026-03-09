@@ -1,12 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../../lib/api';
-import { projectKeys } from './useProjects';
-import type { Project } from '../types';
-
-export interface CreateProjectBody {
-  name: string;
-  description: string | null;
-}
+import { queryKeys } from '../../../lib/queryKeys';
+import type { Project, CreateProjectBody } from '../../../types/project';
 
 async function createProject(body: CreateProjectBody): Promise<Project> {
   const { data } = await apiClient.post<Project>('/projects', body);
@@ -19,7 +14,7 @@ export function useCreateProject() {
   return useMutation({
     mutationFn: createProject,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectKeys.list() });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.list() });
     },
   });
 }

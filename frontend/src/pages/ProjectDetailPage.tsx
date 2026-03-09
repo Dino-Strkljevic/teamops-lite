@@ -13,12 +13,12 @@ import {
   Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import AddIcon from '@mui/icons-material/Add';
-import { useTasks } from '../features/tasks/hooks/useTasks';
-import { projectKeys } from '../features/projects/hooks/useProjects';
-import type { Project } from '../features/projects/types';
-import CreateTaskDialog from '../features/tasks/components/CreateTaskDialog';
-import KanbanBoard from '../features/tasks/components/KanbanBoard';
+import AddIcon       from '@mui/icons-material/Add';
+import { useTasks }      from '../features/tasks/hooks/useTasks';
+import { queryKeys }     from '../lib/queryKeys';
+import type { Project }  from '../types/project';
+import CreateTaskDialog  from '../features/tasks/components/CreateTaskDialog';
+import KanbanBoard       from '../features/tasks/components/KanbanBoard';
 
 type SnackbarState = { open: boolean; severity: 'success' | 'error'; message: string };
 
@@ -26,13 +26,13 @@ const CLOSED_SNACKBAR: SnackbarState = { open: false, severity: 'success', messa
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const navigate      = useNavigate();
+  const queryClient   = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState<SnackbarState>(CLOSED_SNACKBAR);
+  const [snackbar, setSnackbar]     = useState<SnackbarState>(CLOSED_SNACKBAR);
 
   const projectName = queryClient
-    .getQueryData<Project[]>(projectKeys.list())
+    .getQueryData<Project[]>(queryKeys.projects.list())
     ?.find((p) => p.id === projectId)
     ?.name ?? 'Project';
 
@@ -82,14 +82,15 @@ export default function ProjectDetailPage() {
       {!isLoading && !isError && (
         <KanbanBoard
           tasks={tasks ?? []}
-          onSuccess={() => setSnackbar({ open: true, severity: 'success', message: 'Task updated.' })}
-          onError={() => setSnackbar({ open: true, severity: 'error', message: 'Failed to update task. Please try again.' })}
-          onEditSuccess={() => setSnackbar({ open: true, severity: 'success', message: 'Task saved.' })}
-          onEditError={() => setSnackbar({ open: true, severity: 'error', message: 'Failed to save task. Please try again.' })}
+          onSuccess={()      => setSnackbar({ open: true, severity: 'success', message: 'Task updated.' })}
+          onError={()        => setSnackbar({ open: true, severity: 'error',   message: 'Failed to update task. Please try again.' })}
+          onEditSuccess={()  => setSnackbar({ open: true, severity: 'success', message: 'Task saved.' })}
+          onEditError={()    => setSnackbar({ open: true, severity: 'error',   message: 'Failed to save task. Please try again.' })}
           onDeleteSuccess={() => setSnackbar({ open: true, severity: 'success', message: 'Task deleted.' })}
-          onDeleteError={() => setSnackbar({ open: true, severity: 'error', message: 'Failed to delete task. Please try again.' })}
+          onDeleteError={()  => setSnackbar({ open: true, severity: 'error',   message: 'Failed to delete task. Please try again.' })}
         />
       )}
+
       <CreateTaskDialog
         open={dialogOpen}
         projectId={projectId!}

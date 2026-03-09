@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../../lib/api';
-import { taskKeys } from './useTasks';
-import type { Task } from '../types'; // needed for setQueryData generic
+import { queryKeys } from '../../../lib/queryKeys';
+import type { Task } from '../../../types/task';
 
 export interface DeleteTaskArgs {
   taskId:    string;
@@ -21,14 +21,14 @@ export function useDeleteTask() {
     onSuccess: (_data, { taskId, projectId }) => {
       // Remove the deleted task from the cache immediately, then re-sync
       queryClient.setQueryData<Task[]>(
-        taskKeys.byProject(projectId),
+        queryKeys.tasks.byProject(projectId),
         (old) => old?.filter((t) => t.id !== taskId) ?? [],
       );
-      queryClient.invalidateQueries({ queryKey: taskKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
     },
 
     onError: (_err, { projectId }) => {
-      queryClient.invalidateQueries({ queryKey: taskKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
     },
   });
 }

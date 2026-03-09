@@ -1,19 +1,12 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../../lib/api';
-import { taskKeys } from './useTasks';
-import type { Task, TaskPriority } from '../types';
-
-export interface EditTaskBody {
-  title:       string;
-  description: string | null;
-  priority:    TaskPriority;
-  dueDate:     string | null;
-}
+import { queryKeys } from '../../../lib/queryKeys';
+import type { Task, UpdateTaskBody } from '../../../types/task';
 
 export interface EditTaskArgs {
   taskId:    string;
   projectId: string;
-  body:      EditTaskBody;
+  body:      UpdateTaskBody;
 }
 
 async function editTask({ taskId, body }: EditTaskArgs): Promise<Task> {
@@ -28,7 +21,7 @@ export function useEditTask() {
     mutationFn: editTask,
 
     onMutate: async ({ taskId, projectId, body }) => {
-      const key = taskKeys.byProject(projectId);
+      const key = queryKeys.tasks.byProject(projectId);
       await queryClient.cancelQueries({ queryKey: key });
 
       const previous = queryClient.getQueryData<Task[]>(key);
@@ -44,17 +37,17 @@ export function useEditTask() {
 
     onSuccess: (updatedTask, { projectId }) => {
       queryClient.setQueryData<Task[]>(
-        taskKeys.byProject(projectId),
+        queryKeys.tasks.byProject(projectId),
         (old) => old?.map((t) => (t.id === updatedTask.id ? updatedTask : t)) ?? [],
       );
-      queryClient.invalidateQueries({ queryKey: taskKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
     },
 
     onError: (_err, { projectId }, context) => {
       if (context?.previous !== undefined) {
-        queryClient.setQueryData(taskKeys.byProject(projectId), context.previous);
+        queryClient.setQueryData(queryKeys.tasks.byProject(projectId), context.previous);
       }
-      queryClient.invalidateQueries({ queryKey: taskKeys.byProject(projectId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.byProject(projectId) });
     },
   });
 }

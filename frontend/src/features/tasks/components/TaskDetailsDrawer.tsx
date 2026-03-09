@@ -13,50 +13,27 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import CloseIcon          from '@mui/icons-material/Close';
-import DeleteOutlineIcon  from '@mui/icons-material/DeleteOutline';
-import EditOutlinedIcon   from '@mui/icons-material/EditOutlined';
-import ArrowBackIcon      from '@mui/icons-material/ArrowBack';
+import CloseIcon         from '@mui/icons-material/Close';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditOutlinedIcon  from '@mui/icons-material/EditOutlined';
+import ArrowBackIcon     from '@mui/icons-material/ArrowBack';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver }         from '@hookform/resolvers/zod';
 import { z }                   from 'zod';
-import type { Task, TaskPriority, TaskStatus } from '../types';
-import { useEditTask }        from '../hooks/useEditTask';
-import DeleteTaskDialog       from './DeleteTaskDialog';
+import type { Task } from '../types';
+import { useEditTask }   from '../hooks/useEditTask';
+import DeleteTaskDialog  from './DeleteTaskDialog';
+import {
+  TASK_PRIORITIES,
+  PRIORITY_LABEL,
+  PRIORITY_COLOR,
+  STATUS_LABEL,
+  STATUS_COLOR,
+} from '../../../lib/constants';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const DRAWER_WIDTH = 400;
-
-const PRIORITIES: TaskPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-
-const PRIORITY_LABEL: Record<TaskPriority, string> = {
-  LOW:      'Low',
-  MEDIUM:   'Medium',
-  HIGH:     'High',
-  CRITICAL: 'Critical',
-};
-
-const PRIORITY_COLOR: Record<TaskPriority, 'default' | 'success' | 'warning' | 'error'> = {
-  LOW:      'success',
-  MEDIUM:   'default',
-  HIGH:     'warning',
-  CRITICAL: 'error',
-};
-
-const STATUS_LABEL: Record<TaskStatus, string> = {
-  TODO:        'To Do',
-  IN_PROGRESS: 'In Progress',
-  DONE:        'Done',
-  CANCELLED:   'Cancelled',
-};
-
-const STATUS_COLOR: Record<TaskStatus, 'default' | 'info' | 'success' | 'error'> = {
-  TODO:        'default',
-  IN_PROGRESS: 'info',
-  DONE:        'success',
-  CANCELLED:   'error',
-};
 
 const editSchema = z.object({
   title:       z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or fewer'),
@@ -312,7 +289,7 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
                 helperText={errors.priority?.message}
                 disabled={isPending}
               >
-                {PRIORITIES.map((p) => (
+                {TASK_PRIORITIES.map((p) => (
                   <MenuItem key={p} value={p}>
                     {PRIORITY_LABEL[p]}
                   </MenuItem>
@@ -362,12 +339,12 @@ function EditPanel({ task, onCancel, onSuccess, onError }: EditPanelProps) {
 
 
 export interface TaskDetailsDrawerProps {
-  task:             Task | null;
-  onClose:          () => void;
-  onEditSuccess:    (updated: Task) => void;
-  onEditError:      () => void;
-  onDeleteSuccess:  () => void;
-  onDeleteError:    () => void;
+  task:            Task | null;
+  onClose:         () => void;
+  onEditSuccess:   (updated: Task) => void;
+  onEditError:     () => void;
+  onDeleteSuccess: () => void;
+  onDeleteError:   () => void;
 }
 
 export default function TaskDetailsDrawer({
@@ -378,8 +355,8 @@ export default function TaskDetailsDrawer({
   onDeleteSuccess,
   onDeleteError,
 }: TaskDetailsDrawerProps) {
-  const [isEditing, setIsEditing]         = useState(false);
-  const [taskToDelete, setTaskToDelete]   = useState<Task | null>(null);
+  const [isEditing, setIsEditing]       = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   // Reset edit mode whenever the selected task changes or the drawer closes
   useEffect(() => {
@@ -400,7 +377,7 @@ export default function TaskDetailsDrawer({
 
   function handleDeleteSuccess() {
     setTaskToDelete(null);
-    onClose();          // close the drawer — the task no longer exists
+    onClose();           // close the drawer — the task no longer exists
     onDeleteSuccess();
   }
 

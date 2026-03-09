@@ -11,16 +11,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateTask } from '../hooks/useCreateTask';
-import type { TaskPriority } from '../types';
-
-const PRIORITIES: TaskPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
-
-const PRIORITY_LABEL: Record<TaskPriority, string> = {
-  LOW:      'Low',
-  MEDIUM:   'Medium',
-  HIGH:     'High',
-  CRITICAL: 'Critical',
-};
+import { TASK_PRIORITIES, PRIORITY_LABEL } from '../../../lib/constants';
 
 const schema = z.object({
   title:       z.string().min(1, 'Title is required').max(255, 'Title must be 255 characters or fewer'),
@@ -122,7 +113,7 @@ export default function CreateTaskDialog({ open, projectId, onClose, onSuccess, 
                 error={!!errors.priority}
                 helperText={errors.priority?.message}
               >
-                {PRIORITIES.map((p) => (
+                {TASK_PRIORITIES.map((p) => (
                   <MenuItem key={p} value={p}>
                     {PRIORITY_LABEL[p]}
                   </MenuItem>
