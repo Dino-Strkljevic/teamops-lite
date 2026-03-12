@@ -13,6 +13,13 @@ spring:
   flyway:
     enabled: true
 
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minio}
+  secret-key: ${MINIO_SECRET_KEY:minio123}
+  bucket: ${MINIO_BUCKET:teamops-uploads}
+  presigned-url-expiry-minutes: ${MINIO_PRESIGNED_EXPIRY_MINUTES:60}
+
 management:
   endpoints:
     web:

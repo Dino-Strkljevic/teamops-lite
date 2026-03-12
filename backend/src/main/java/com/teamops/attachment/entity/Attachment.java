@@ -6,12 +6,9 @@ import com.teamops.user.entity.User;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.UUID;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "attachments")
-@EntityListeners(AuditingEntityListener.class)
 public class Attachment {
 
   @Id
@@ -42,8 +39,7 @@ public class Attachment {
   @Column(name = "storage_key", nullable = false)
   private String storageKey;
 
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
+  @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
   private Instant createdAt;
 
   public Attachment() {}

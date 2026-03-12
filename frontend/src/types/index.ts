@@ -6,4 +6,5 @@ export type {
   CreateTaskBody,
   UpdateTaskBody,
   Comment,
+  Attachment,
 } from "./task";

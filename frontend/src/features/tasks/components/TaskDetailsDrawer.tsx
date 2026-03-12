@@ -26,6 +26,7 @@ import { useEditTask } from "../hooks/useEditTask";
 import { useComments } from "../hooks/useComments";
 import { useCreateComment } from "../hooks/useCreateComment";
 import DeleteTaskDialog from "./DeleteTaskDialog";
+import AttachmentsSection from "./AttachmentsSection";
 import {
   TASK_PRIORITIES,
   PRIORITY_LABEL,
@@ -380,6 +381,8 @@ function ViewPanel({ task, onEdit, onDelete }: ViewPanelProps) {
             )}
           </Stack>
         </Stack>
+
+        <AttachmentsSection taskId={task.id} />
 
         <CommentsSection taskId={task.id} />
       </Box>

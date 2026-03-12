@@ -40,3 +40,15 @@ export interface Comment {
   body: string;
   createdAt: string;
 }
+
+export interface Attachment {
+  id: string;
+  taskId: string;
+  orgId: string;
+  uploadedBy: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+  storageKey: string;
+  createdAt: string;
+}
