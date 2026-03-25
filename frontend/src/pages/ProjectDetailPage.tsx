@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import {
   Alert,
   Box,
@@ -15,8 +14,7 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import { useTasks } from "../features/tasks/hooks/useTasks";
-import { queryKeys } from "../lib/queryKeys";
-import type { Project } from "../types/project";
+import { useProject } from "../features/projects/hooks/useProjects";
 import CreateTaskDialog from "../features/tasks/components/CreateTaskDialog";
 import KanbanBoard from "../features/tasks/components/KanbanBoard";
 
@@ -35,14 +33,11 @@ const CLOSED_SNACKBAR: SnackbarState = {
 export default function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarState>(CLOSED_SNACKBAR);
 
-  const projectName =
-    queryClient
-      .getQueryData<Project[]>(queryKeys.projects.list())
-      ?.find((p) => p.id === projectId)?.name ?? "Project";
+  const { data: project } = useProject(projectId!);
+  const projectName = project?.name ?? "Project";
 
   const { data: tasks, isLoading, isError } = useTasks(projectId!);
 
