@@ -1,6 +1,7 @@
 package com.teamops.task.controller;
 
 import com.teamops.common.enums.TaskStatus;
+import com.teamops.security.AuthUtils;
 import com.teamops.task.dto.request.AssignTaskRequest;
 import com.teamops.task.dto.request.CreateCommentRequest;
 import com.teamops.task.dto.request.CreateTaskRequest;
@@ -23,18 +24,21 @@ public class TaskController {
 
   private final TaskService taskService;
   private final TaskCommentService taskCommentService;
+  private final AuthUtils authUtils;
 
-  public TaskController(TaskService taskService, TaskCommentService taskCommentService) {
+  public TaskController(
+      TaskService taskService, TaskCommentService taskCommentService, AuthUtils authUtils) {
     this.taskService = taskService;
     this.taskCommentService = taskCommentService;
+    this.authUtils = authUtils;
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public TaskResponse create(
-      @RequestHeader("X-Org-Id") UUID orgId,
-      @RequestHeader("X-User-Id") UUID userId,
-      @Valid @RequestBody CreateTaskRequest body) {
+      @RequestHeader("X-Org-Id") UUID orgId, @Valid @RequestBody CreateTaskRequest body) {
+
+    UUID userId = authUtils.currentUserId();
 
     Task task =
         taskService.createTask(
@@ -117,10 +121,10 @@ public class TaskController {
   @ResponseStatus(HttpStatus.CREATED)
   public CommentResponse createComment(
       @RequestHeader("X-Org-Id") UUID orgId,
-      @RequestHeader("X-User-Id") UUID userId,
       @PathVariable UUID taskId,
       @Valid @RequestBody CreateCommentRequest body) {
 
+    UUID userId = authUtils.currentUserId();
     return taskCommentService.createComment(taskId, orgId, userId, body.body());
   }
 }

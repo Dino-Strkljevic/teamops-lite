@@ -4,6 +4,7 @@ import com.teamops.project.dto.request.CreateProjectRequest;
 import com.teamops.project.dto.response.ProjectResponse;
 import com.teamops.project.entity.Project;
 import com.teamops.project.service.ProjectService;
+import com.teamops.security.AuthUtils;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -15,18 +16,19 @@ import org.springframework.web.bind.annotation.*;
 public class ProjectController {
 
   private final ProjectService projectService;
+  private final AuthUtils authUtils;
 
-  public ProjectController(ProjectService projectService) {
+  public ProjectController(ProjectService projectService, AuthUtils authUtils) {
     this.projectService = projectService;
+    this.authUtils = authUtils;
   }
 
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public ProjectResponse create(
-      @RequestHeader("X-Org-Id") UUID orgId,
-      @RequestHeader("X-User-Id") UUID userId,
-      @Valid @RequestBody CreateProjectRequest body) {
+      @RequestHeader("X-Org-Id") UUID orgId, @Valid @RequestBody CreateProjectRequest body) {
 
+    UUID userId = authUtils.currentUserId();
     Project project = projectService.createProject(orgId, userId, body.name(), body.description());
     return ProjectResponse.from(project);
   }

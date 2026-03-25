@@ -14,6 +14,10 @@
  *   queryKeys.attachments.byTask(tid)      // ['attachments', 'task', tid]
  */
 export const queryKeys = {
+  auth: {
+    me: () => ["auth", "me"] as const,
+  },
+
   projects: {
     all: () => ["projects"] as const,
     list: () => ["projects", "list"] as const,

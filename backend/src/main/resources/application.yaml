@@ -20,6 +20,11 @@ minio:
   bucket: ${MINIO_BUCKET:teamops-uploads}
   presigned-url-expiry-minutes: ${MINIO_PRESIGNED_EXPIRY_MINUTES:60}
 
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-me-to-a-secure-256-bit-secret-value-in-production}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+
 management:
   endpoints:
     web:

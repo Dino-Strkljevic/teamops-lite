@@ -2,16 +2,20 @@ import {
   AppBar,
   Box,
   Drawer,
+  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import FolderIcon from "@mui/icons-material/Folder";
-import { Outlet, NavLink } from "react-router-dom";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../features/auth/AuthContext";
 
 const DRAWER_WIDTH = 240;
 
@@ -21,6 +25,14 @@ const NAV_ITEMS = [
 ];
 
 export default function AppLayout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <Box sx={{ display: "flex" }}>
       <AppBar
@@ -28,9 +40,21 @@ export default function AppLayout() {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar>
-          <Typography variant="h6" noWrap>
+          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             TeamOps Lite
           </Typography>
+
+          {user && (
+            <Typography variant="body2" sx={{ mr: 1, opacity: 0.85 }}>
+              {user.displayName}
+            </Typography>
+          )}
+
+          <Tooltip title="Sign out">
+            <IconButton color="inherit" onClick={handleLogout} size="small">
+              <LogoutIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
 
