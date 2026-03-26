@@ -11,21 +11,20 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useForm } from "react-hook-form";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { z } from "zod";
-import { useLogin } from "./useLogin";
+import { useRegister } from "./useRegister";
 
 const schema = z.object({
+  displayName: z.string().min(1, "Display name is required"),
   email: z.string().email("Enter a valid email"),
-  password: z.string().min(1, "Password is required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type FormValues = z.infer<typeof schema>;
 
-export default function LoginPage() {
-  const { mutate, isPending, error } = useLogin();
-  const location = useLocation();
-  const justRegistered = (location.state as { registered?: boolean } | null)?.registered === true;
+export default function RegisterPage() {
+  const { mutate, isPending, error, isSuccess } = useRegister();
 
   const {
     register,
@@ -35,12 +34,18 @@ export default function LoginPage() {
 
   const onSubmit = (values: FormValues) => mutate(values);
 
-  const serverError =
-    error != null
-      ? axios.isAxiosError(error) && error.response?.status === 401
-        ? "Invalid email or password."
-        : "Something went wrong. Please try again."
-      : null;
+  const serverError = (() => {
+    if (!error) return null;
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 409) {
+        return "An account with this email already exists.";
+      }
+      if (error.response?.status === 400) {
+        return "Please check your input and try again.";
+      }
+    }
+    return "Something went wrong. Please try again.";
+  })();
 
   return (
     <Box
@@ -63,9 +68,13 @@ export default function LoginPage() {
           TeamOps Lite
         </Typography>
 
-        {justRegistered && (
+        <Typography variant="subtitle1" mb={3} textAlign="center" color="text.secondary">
+          Create your account
+        </Typography>
+
+        {isSuccess && (
           <Alert severity="success" sx={{ mb: 2 }}>
-            Account created successfully! Please sign in.
+            Account created! Redirecting to sign in…
           </Alert>
         )}
 
@@ -76,10 +85,21 @@ export default function LoginPage() {
         )}
 
         <TextField
+          label="Display Name"
+          type="text"
+          autoComplete="name"
+          autoFocus
+          fullWidth
+          margin="normal"
+          error={!!errors.displayName}
+          helperText={errors.displayName?.message}
+          {...register("displayName")}
+        />
+
+        <TextField
           label="Email"
           type="email"
           autoComplete="email"
-          autoFocus
           fullWidth
           margin="normal"
           error={!!errors.email}
@@ -90,7 +110,7 @@ export default function LoginPage() {
         <TextField
           label="Password"
           type="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           fullWidth
           margin="normal"
           error={!!errors.password}
@@ -106,13 +126,13 @@ export default function LoginPage() {
           disabled={isPending}
           sx={{ mt: 3 }}
         >
-          {isPending ? <CircularProgress size={22} color="inherit" /> : "Sign in"}
+          {isPending ? <CircularProgress size={22} color="inherit" /> : "Create account"}
         </Button>
 
         <Typography variant="body2" textAlign="center" mt={3} color="text.secondary">
-          Don&apos;t have an account?{" "}
-          <Link component={RouterLink} to="/register" underline="hover">
-            Create one
+          Already have an account?{" "}
+          <Link component={RouterLink} to="/login" underline="hover">
+            Sign in
           </Link>
         </Typography>
       </Paper>

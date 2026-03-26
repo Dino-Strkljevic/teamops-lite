@@ -16,3 +16,9 @@ export interface AuthResponse {
   email: string;
   displayName: string;
 }
+
+export interface RegisterBody {
+  displayName: string;
+  email: string;
+  password: string;
+}

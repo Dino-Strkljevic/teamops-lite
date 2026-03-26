@@ -1,4 +1,4 @@
-export type { AuthUser, LoginBody, AuthResponse } from "./auth";
+export type { AuthUser, LoginBody, AuthResponse, RegisterBody } from "./auth";
 export type { Project, CreateProjectBody } from "./project";
 export type {
   Task,
